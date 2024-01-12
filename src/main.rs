@@ -45,7 +45,7 @@ fn main() {
     let parties = vec![Party::random(&params, hw), Party::random(&params, hw)];
 
     // Collective public key generation //
-    let crs = [0u8; 32];
+    let crs = [1u8; 32];
     let mut rng = thread_rng();
     // Each party generates their share
     let shares = parties
@@ -60,7 +60,7 @@ fn main() {
 
     // Collective relinearization key generation //
     // This is a 2 round protocol
-    let crs = [0u8; 32];
+    let crs = [4u8; 32];
     let level = 0;
     // Each party generates a ephemeral state
     let parties_state = parties
