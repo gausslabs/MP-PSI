@@ -1,6 +1,6 @@
 use bfv::{
     BfvParameters, CollectiveDecryption, CollectivePublicKeyGenerator, CollectiveRlkGenerator,
-    Encoding, EvaluationKey, Evaluator, PartySecret, Plaintext, Poly, PublicKey, SecretKey,
+    Encoding, EvaluationKey, Evaluator, MHEDebugger, Plaintext, Poly, PublicKey, SecretKey,
 };
 use itertools::{izip, Itertools};
 use rand::{distributions::Uniform, thread_rng, Rng};
@@ -36,8 +36,8 @@ fn plain_psi(parties: &[Party]) -> Vec<u64> {
 }
 
 fn main() {
-    let mut params = BfvParameters::new(&[50, 50, 50], 65537, 1 << 15);
-    params.enable_hybrid_key_switching(&[50, 50]);
+    let mut params = BfvParameters::new(&[30, 30], 65537, 1 << 15);
+    params.enable_hybrid_key_switching(&[30]);
     params.enable_pke();
 
     let hw = 21000;
@@ -129,6 +129,15 @@ fn main() {
     let evaluator = Evaluator::new(params);
     let ct1ct2 = evaluator.mul(&ct1, &ct2);
     let psi_ct = evaluator.relinearize(&ct1ct2, &evaluation_key);
+
+    unsafe {
+        let secrets = parties.iter().map(|s| s.secret.clone()).collect_vec();
+        dbg!(MHEDebugger::measure_noise(
+            &secrets,
+            evaluator.params(),
+            &psi_ct
+        ));
+    }
 
     // Collective decryption //
     // Each party can independently generate their share to decrypt `psi_ct`. Unless the other party has evaluated the FHE circuit maliciously, they should be able to decrypt `psi_ct` after receiving other party's share.

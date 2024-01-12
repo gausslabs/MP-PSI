@@ -17,7 +17,6 @@ checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 [[package]]
 name = "bfv"
 version = "0.1.0"
-source = "git+https://github.com/Janmajayamall/bfv?branch=pk#34090532ce04ee6c143753edab11f902c057837c"
 dependencies = [
  "concrete-ntt",
  "crypto-bigint",
@@ -344,7 +343,6 @@ dependencies = [
 [[package]]
 name = "traits"
 version = "0.1.0"
-source = "git+https://github.com/Janmajayamall/bfv?branch=pk#34090532ce04ee6c143753edab11f902c057837c"
 
 [[package]]
 name = "unicode-ident"
