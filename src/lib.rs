@@ -10,7 +10,7 @@ static CRS_PK: [u8; 32] = [0u8; 32];
 static CRS_RLK: [u8; 32] = [0u8; 32];
 
 fn params() -> BfvParameters {
-    let mut params = BfvParameters::new(&[30, 30], 65537, 1 << 15);
+    let mut params = BfvParameters::new(&[30, 30], 65537, 1 << 11);
     params.enable_hybrid_key_switching(&[30]);
     params.enable_pke();
     params
@@ -337,6 +337,7 @@ fn state4(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use itertools::{izip, Itertools};
     use rand::{distributions::Uniform, Rng};
 
     fn random_bit_vector(hamming_weight: usize, size: usize) -> Vec<u32> {
@@ -349,6 +350,12 @@ mod tests {
         });
 
         bit_vector
+    }
+
+    fn plain_psi(bit_vector0: &[u32], bit_vector_1: &[u32]) -> Vec<u32> {
+        izip!(bit_vector0.iter(), bit_vector_1.iter())
+            .map(|(b0, b1)| b0 * b1)
+            .collect_vec()
     }
 
     #[test]
@@ -383,6 +390,9 @@ mod tests {
         // A: state 4
         let psi_output_a = state4(public_output_a_state2, message_b_to_a_state3);
 
+        let expected_psi_output = plain_psi(&bit_vector_a, &bit_vector_b);
+
+        assert_eq!(expected_psi_output, psi_output_a[..vector_size]);
         assert_eq!(psi_output_a, psi_output_b);
     }
 }
