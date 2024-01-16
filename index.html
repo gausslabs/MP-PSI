@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>mp-psi example</title>
+  </head>
+  <body>
+    <script type="module">
+      import init, { statetest } from "./pkg/mp_psi.js";
+      init().then(() => {
+        console.log("hello-wasm initialized");
+        console.log(statetest());
+      });
+    </script>
+  </body>
+</html>

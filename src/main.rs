@@ -1,6 +1,6 @@
 use bfv::{
     BfvParameters, CollectiveDecryption, CollectivePublicKeyGenerator, CollectiveRlkGenerator,
-    Encoding, EvaluationKey, Evaluator, MHEDebugger, Plaintext, Poly, PublicKey, SecretKey,
+    Encoding, EvaluationKey, Evaluator, MHEDebugger, Plaintext, Poly, SecretKey,
 };
 use itertools::{izip, Itertools};
 use rand::{distributions::Uniform, thread_rng, Rng};

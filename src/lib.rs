@@ -1,10 +1,11 @@
 use bfv::{
     BfvParameters, Ciphertext, CollectiveDecryption, CollectivePublicKeyGenerator,
     CollectiveRlkGenerator, CollectiveRlkGeneratorState, Encoding, EvaluationKey, Evaluator,
-    Plaintext, Poly, SecretKey,
+    Plaintext, Poly, SecretKey, SecretKeyProto,
 };
 use rand::thread_rng;
-use traits::{TryDecodingWithParameters, TryEncodingWithParameters};
+use traits::{TryDecodingWithParameters, TryEncodingWithParameters, TryFromWithParameters};
+use wasm_bindgen::prelude::wasm_bindgen;
 
 static CRS_PK: [u8; 32] = [0u8; 32];
 static CRS_RLK: [u8; 32] = [0u8; 32];
@@ -40,6 +41,7 @@ struct PublicOutputBPostState1 {
     share_rlk_b_round2: (Vec<Poly>, Vec<Poly>),
     rlk_agg_round1_h1s: Vec<Poly>,
 }
+
 struct MessageBToAPostState1 {
     share_pk_b: Poly,
     share_rlk_b_round1: (Vec<Poly>, Vec<Poly>),
@@ -60,6 +62,21 @@ struct MessageAToBPostState2 {
 
 struct MessageBToAPostState3 {
     decryption_share_b: Poly,
+}
+
+#[wasm_bindgen]
+pub fn statetest() -> Vec<u8> {
+    let params = params();
+    let mut rng = thread_rng();
+    let s_pk_a = SecretKey::random_with_params(&params, &mut rng);
+
+    // Serialize the SecretKey using your existing protobuf methods
+    let serialized_sk = SecretKeyProto::try_from_with_parameters(&s_pk_a, &params);
+
+    // Convert the serialized SecretKey to a Vec<u8>
+    let bytes = serialized_sk.coefficients;
+
+    bytes
 }
 
 fn state0() -> (
@@ -337,8 +354,10 @@ fn state4(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use bfv::SecretKeyProto;
     use itertools::{izip, Itertools};
     use rand::{distributions::Uniform, Rng};
+    use traits::TryFromWithParameters;
 
     fn random_bit_vector(hamming_weight: usize, size: usize) -> Vec<u32> {
         let mut rng = thread_rng();
