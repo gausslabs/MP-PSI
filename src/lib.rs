@@ -70,13 +70,8 @@ pub fn statetest() -> Vec<u8> {
     let mut rng = thread_rng();
     let s_pk_a = SecretKey::random_with_params(&params, &mut rng);
 
-    // Serialize the SecretKey using your existing protobuf methods
     let serialized_sk = SecretKeyProto::try_from_with_parameters(&s_pk_a, &params);
-
-    // Convert the serialized SecretKey to a Vec<u8>
-    let bytes = serialized_sk.coefficients;
-
-    bytes
+    serialized_sk.coefficients
 }
 
 fn state0() -> (
