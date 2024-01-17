@@ -6,10 +6,9 @@
   </head>
   <body>
     <script type="module">
-      import init, { statetest } from "./pkg/mp_psi.js";
+      import init, { state0_serialized } from "./pkg/mp_psi.js";
       init().then(() => {
-        console.log("hello-wasm initialized");
-        console.log(statetest());
+        console.log(state0_serialized());
       });
     </script>
   </body>

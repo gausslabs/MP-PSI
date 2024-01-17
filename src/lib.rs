@@ -65,13 +65,21 @@ struct MessageBToAPostState3 {
 }
 
 #[wasm_bindgen]
-pub fn statetest() -> Vec<u8> {
-    let params = params();
-    let mut rng = thread_rng();
-    let s_pk_a = SecretKey::random_with_params(&params, &mut rng);
+pub fn state0_serialized() -> Vec<u8> {
+    let (private_output_a_state0, _, _) = state0();
 
-    let serialized_sk = SecretKeyProto::try_from_with_parameters(&s_pk_a, &params);
-    serialized_sk.coefficients
+    let s_pk_a_serialized =
+        SecretKeyProto::try_from_with_parameters(&private_output_a_state0.s_pk_a, &params())
+            .coefficients;
+
+    let s_rlk_a_serialized =
+        SecretKeyProto::try_from_with_parameters(&private_output_a_state0.s_rlk_a, &params())
+            .coefficients;
+
+    let mut output_serialized = s_pk_a_serialized;
+    output_serialized.extend(s_rlk_a_serialized);
+
+    output_serialized
 }
 
 fn state0() -> (
