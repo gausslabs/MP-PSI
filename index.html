@@ -8,7 +8,14 @@
     <script type="module">
       import init, { state0_serialized } from "./pkg/mp_psi.js";
       init().then(() => {
-        console.log(state0_serialized());
+        const private_output_a_state_0 = state0_serialized();
+        // slice the array into 2 arrays of 513 elements each
+        const s_pk_a = private_output_a_state_0.slice(0, 513);
+        const s_rlk_a = private_output_a_state_0.slice(513, 1026);
+        print("s_pk_a", s_pk_a);
+        print("length of s_pk_a", s_pk_a.length)
+        print("s_rlk_a", s_rlk_a);
+        print("length of s_rlk_a", s_rlk_a.length)
       });
     </script>
   </body>
