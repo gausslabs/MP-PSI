@@ -115,6 +115,13 @@ fn state0() -> (
     (private_state_a, public_output_a, message_a_to_b)
 }
 
+// #[wasm_bindgen]
+// pub fn state1_serialized(message_from_a: Vec<u8>, bit_vector: &[u32]) -> Vec<u8> {
+//     // Deserialize message from A
+//     // Perform state 1
+//     // Serialize return message from `state1`
+// }
+
 fn state1(
     message_from_a: MessageAToBPostState0,
     bit_vector: &[u32],
@@ -182,6 +189,13 @@ fn state1(
 
     (private_output_b, public_output_b, message_to_a)
 }
+
+// #[wasm_bindgen]
+// pub fn state2_serialized(private_output_a_state0: Vec<u8>, public_output_a_state0: Vec<u8>, message_from_b: Vec<u8>, bit_vector: &[u32]) -> Vec<u8> {
+//     // Deserialize inputs
+//     // Perform state 2
+//     // Serialize return message from `state2`
+// }
 
 fn state2(
     private_output_a_state0: PrivateOutputAPostState0,
@@ -357,10 +371,8 @@ fn state4(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use bfv::SecretKeyProto;
     use itertools::{izip, Itertools};
     use rand::{distributions::Uniform, Rng};
-    use traits::TryFromWithParameters;
 
     fn random_bit_vector(hamming_weight: usize, size: usize) -> Vec<u32> {
         let mut rng = thread_rng();
