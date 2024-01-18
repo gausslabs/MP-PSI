@@ -237,6 +237,40 @@ export function state2_bindgen(private_output_a_state0, public_output_a_state0, 
     return takeObject(ret);
 }
 
+/**
+* @param {any} private_output_b_state1
+* @param {any} public_output_b_state1
+* @param {any} message_a_to_b
+* @returns {any}
+*/
+export function state3_bindgen(private_output_b_state1, public_output_b_state1, message_a_to_b) {
+    const ret = wasm.state3_bindgen(addHeapObject(private_output_b_state1), addHeapObject(public_output_b_state1), addHeapObject(message_a_to_b));
+    return takeObject(ret);
+}
+
+function getArrayU32FromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    return getUint32Memory0().subarray(ptr / 4, ptr / 4 + len);
+}
+/**
+* @param {any} public_output_a_state2
+* @param {any} message_b_to_a
+* @returns {Uint32Array}
+*/
+export function state4_bindgen(public_output_a_state2, message_b_to_a) {
+    try {
+        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+        wasm.state4_bindgen(retptr, addHeapObject(public_output_a_state2), addHeapObject(message_b_to_a));
+        var r0 = getInt32Memory0()[retptr / 4 + 0];
+        var r1 = getInt32Memory0()[retptr / 4 + 1];
+        var v1 = getArrayU32FromWasm0(r0, r1).slice();
+        wasm.__wbindgen_free(r0, r1 * 4, 4);
+        return v1;
+    } finally {
+        wasm.__wbindgen_add_to_stack_pointer(16);
+    }
+}
+
 function handleError(f, args) {
     try {
         return f.apply(this, args);

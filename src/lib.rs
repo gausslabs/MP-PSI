@@ -1,14 +1,16 @@
 use bfv::{
-    BfvParameters, Ciphertext, CiphertextProto, CollectiveDecryption, CollectiveDecryptionShare,
-    CollectiveDecryptionShareProto, CollectivePublicKeyGenerator, CollectivePublicKeyShare,
-    CollectivePublicKeyShareProto, CollectiveRlkAggTrimmedShare1,
-    CollectiveRlkAggTrimmedShare1Proto, CollectiveRlkGenerator, CollectiveRlkGeneratorState,
-    CollectiveRlkShare1, CollectiveRlkShare1Proto, CollectiveRlkShare2, CollectiveRlkShare2Proto,
-    Encoding, EvaluationKey, Evaluator, Plaintext, Poly, SecretKey, SecretKeyProto,
+    BfvParameters, CiphertextProto, CollectiveDecryption, CollectiveDecryptionShare,
+    CollectiveDecryptionShareProto, CollectivePublicKeyGenerator, CollectivePublicKeyShareProto,
+    CollectiveRlkAggTrimmedShare1Proto, CollectiveRlkGenerator, CollectiveRlkShare1Proto,
+    CollectiveRlkShare2Proto, Encoding, EvaluationKey, Evaluator, Plaintext, SecretKey,
+    SecretKeyProto,
 };
 use rand::thread_rng;
 use serde::{Deserialize, Serialize};
-use traits::{TryEncodingWithParameters, TryFromWithLevelledParameters, TryFromWithParameters};
+use traits::{
+    TryDecodingWithParameters, TryEncodingWithParameters, TryFromWithLevelledParameters,
+    TryFromWithParameters,
+};
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
 static CRS_PK: [u8; 32] = [0u8; 32];
@@ -113,6 +115,12 @@ struct MessageBToAPostState3 {
     decryption_share_b: CollectiveDecryptionShareProto,
 }
 
+#[derive(Serialize, Deserialize)]
+struct OutputState3 {
+    message_b_to_a: MessageBToAPostState3,
+    psi_output: Vec<u32>,
+}
+
 #[wasm_bindgen]
 pub fn state0_bindgen() -> JsValue {
     let (private_output_a, public_output_a, message_a_to_b) = state0();
@@ -163,7 +171,7 @@ fn state0() -> (
 #[wasm_bindgen]
 pub fn state1_bindgen(message_a_to_b: JsValue, bit_vector: &[u32]) -> JsValue {
     let message_a_to_b: MessageAToBPostState0 = serde_wasm_bindgen::from_value(message_a_to_b)
-        .expect("failed to deserialize message_from_a");
+        .expect("failed to deserialize message_a_to_b");
 
     let (private_output_b, public_output_b, message_b_to_a) = state1(message_a_to_b, bit_vector);
 
@@ -254,13 +262,13 @@ pub fn state2_bindgen(
         serde_wasm_bindgen::from_value(public_output_a_state0)
             .expect("failed to deserialize public_output_a_state0");
 
-    let message_from_b: MessageBToAPostState1 = serde_wasm_bindgen::from_value(message_b_to_a)
-        .expect("failed to deserialize message_from_b");
+    let message_b_to_a: MessageBToAPostState1 = serde_wasm_bindgen::from_value(message_b_to_a)
+        .expect("failed to deserialize message_b_to_a");
 
     let (public_output_a, message_a_to_b) = state2(
         private_output_a_state0,
         public_output_a_state0,
-        message_from_b,
+        message_b_to_a,
         bit_vector,
     );
 
@@ -356,85 +364,159 @@ fn state2(
     (public_output_a, message_a_to_b)
 }
 
-// fn state3(
-//     private_output_b_state1: PrivateOutputBPostState1,
-//     public_output_b_state1: PublicOutputBPostState1,
-//     message_from_a: MessageAToBPostState2,
-// ) -> (MessageBToAPostState3, Vec<u32>) {
-//     let params = params();
-//     let mut rng = thread_rng();
+#[wasm_bindgen]
+pub fn state3_bindgen(
+    private_output_b_state1: JsValue,
+    public_output_b_state1: JsValue,
+    message_a_to_b: JsValue,
+) -> JsValue {
+    let private_output_b_state1: PrivateOutputBPostState1 =
+        serde_wasm_bindgen::from_value(private_output_b_state1)
+            .expect("failed to deserialize private_output_b_state1");
 
-//     // create rlk
-//     let rlk_shares_round2 = vec![
-//         message_from_a.share_rlk_a_round2,
-//         public_output_b_state1.share_rlk_b_round2,
-//     ];
-//     let rlk = CollectiveRlkGenerator::aggregate_shares_2(
-//         &params,
-//         &rlk_shares_round2,
-//         public_output_b_state1.rlk_agg_round1_h1s,
-//         0,
-//     );
+    let public_output_b_state1: PublicOutputBPostState1 =
+        serde_wasm_bindgen::from_value(public_output_b_state1)
+            .expect("failed to deserialize public_output_b_state1");
 
-//     // perform PSI
-//     let evaluator = Evaluator::new(params);
-//     let evaluation_key = EvaluationKey::new_raw(&[0], vec![rlk], &[], &[], vec![]);
-//     let ciphertext_res = evaluator.mul(
-//         &message_from_a.ciphertext_a,
-//         &public_output_b_state1.ciphertext_b,
-//     );
-//     let ciphertext_res = evaluator.relinearize(&ciphertext_res, &evaluation_key);
+    let message_a_to_b: MessageAToBPostState2 = serde_wasm_bindgen::from_value(message_a_to_b)
+        .expect("failed to deserialize message_a_to_b");
 
-//     // generate B's decryption share
-//     let decryption_share_b = CollectiveDecryption::generate_share(
-//         evaluator.params(),
-//         &ciphertext_res,
-//         &private_output_b_state1.s_pk_b,
-//         &mut rng,
-//     );
+    let (message_b_to_a, psi_output) = state3(
+        private_output_b_state1,
+        public_output_b_state1,
+        message_a_to_b,
+    );
 
-//     // decrypt ciphertext res
-//     let decryption_shares_vec = vec![
-//         decryption_share_b.clone(),
-//         message_from_a.decryption_share_a,
-//     ];
-//     let psi_output = CollectiveDecryption::aggregate_share_and_decrypt(
-//         evaluator.params(),
-//         &ciphertext_res,
-//         &decryption_shares_vec,
-//     );
-//     let psi_output = Vec::<u32>::try_decoding_with_parameters(
-//         &psi_output,
-//         evaluator.params(),
-//         Encoding::default(),
-//     );
+    let output = OutputState3 {
+        message_b_to_a,
+        psi_output,
+    };
 
-//     let message_b_to_a = MessageBToAPostState3 { decryption_share_b };
+    serde_wasm_bindgen::to_value(&output).unwrap()
+}
 
-//     (message_b_to_a, psi_output)
-// }
+fn state3(
+    private_output_b_state1: PrivateOutputBPostState1,
+    public_output_b_state1: PublicOutputBPostState1,
+    message_a_to_b: MessageAToBPostState2,
+) -> (MessageBToAPostState3, Vec<u32>) {
+    let params = params();
+    let mut rng = thread_rng();
 
-// fn state4(
-//     public_output_a_state2: PublicOutputAPostState2,
-//     message_from_b: MessageBToAPostState3,
-// ) -> Vec<u32> {
-//     let params = params();
+    // create rlk
+    let rlk_shares_round2 = vec![
+        convert_from_proto(&message_a_to_b.share_rlk_a_round2, &params),
+        convert_from_proto(&public_output_b_state1.share_rlk_b_round2, &params),
+    ];
 
-//     // decrypt ciphertext res
-//     let decryption_shares_vec = vec![
-//         public_output_a_state2.decryption_share_a,
-//         message_from_b.decryption_share_b,
-//     ];
-//     let psi_output = CollectiveDecryption::aggregate_share_and_decrypt(
-//         &params,
-//         &public_output_a_state2.ciphertext_res,
-//         &decryption_shares_vec,
-//     );
-//     let psi_output =
-//         Vec::<u32>::try_decoding_with_parameters(&psi_output, &params, Encoding::default());
+    let rlk_agg_round1_h1s =
+        convert_from_proto(&public_output_b_state1.rlk_agg_round1_h1s, &params);
 
-//     psi_output
-// }
+    let rlk = CollectiveRlkGenerator::aggregate_shares_2(
+        &params,
+        &rlk_shares_round2,
+        rlk_agg_round1_h1s,
+        0,
+    );
+
+    // perform PSI
+    let evaluator = Evaluator::new(params.clone());
+    let evaluation_key = EvaluationKey::new_raw(&[0], vec![rlk], &[], &[], vec![]);
+
+    let ciphertext_a = convert_from_proto(&message_a_to_b.ciphertext_a, &params);
+    let ciphertext_b = convert_from_proto(&public_output_b_state1.ciphertext_b, &params);
+
+    let ciphertext_res = evaluator.mul(&ciphertext_a, &ciphertext_b);
+    let ciphertext_res = evaluator.relinearize(&ciphertext_res, &evaluation_key);
+
+    let s_pk_b = convert_from_proto(&private_output_b_state1.s_pk_b, &params);
+
+    // generate B's decryption share
+    let decryption_share_b = CollectiveDecryption::generate_share(
+        evaluator.params(),
+        &ciphertext_res,
+        &s_pk_b,
+        &mut rng,
+    );
+
+    // decrypt ciphertext res
+    let decryption_shares_vec = vec![
+        decryption_share_b.clone(),
+        CollectiveDecryptionShare::try_from_with_levelled_parameters(
+            &message_a_to_b.decryption_share_a,
+            &params,
+            0,
+        ),
+    ];
+    let psi_output = CollectiveDecryption::aggregate_share_and_decrypt(
+        evaluator.params(),
+        &ciphertext_res,
+        &decryption_shares_vec,
+    );
+
+    let psi_output = Vec::<u32>::try_decoding_with_parameters(
+        &psi_output,
+        evaluator.params(),
+        Encoding::default(),
+    );
+
+    let message_b_to_a = MessageBToAPostState3 {
+        decryption_share_b: CollectiveDecryptionShareProto::try_from_with_levelled_parameters(
+            &decryption_share_b,
+            &params,
+            0,
+        ),
+    };
+
+    (message_b_to_a, psi_output)
+}
+
+#[wasm_bindgen]
+pub fn state4_bindgen(public_output_a_state2: JsValue, message_b_to_a: JsValue) -> Vec<u32> {
+    let public_output_a_state2: PublicOutputAPostState2 =
+        serde_wasm_bindgen::from_value(public_output_a_state2)
+            .expect("failed to deserialize public_output_a_state2");
+
+    let message_b_to_a: MessageBToAPostState3 = serde_wasm_bindgen::from_value(message_b_to_a)
+        .expect("failed to deserialize message_b_to_a");
+
+    let psi_output = state4(public_output_a_state2, message_b_to_a);
+
+    psi_output
+}
+
+fn state4(
+    public_output_a_state2: PublicOutputAPostState2,
+    message_b_to_a: MessageBToAPostState3,
+) -> Vec<u32> {
+    let params = params();
+
+    // decrypt ciphertext res
+    let decryption_shares_vec = vec![
+        CollectiveDecryptionShare::try_from_with_levelled_parameters(
+            &public_output_a_state2.decryption_share_a,
+            &params,
+            0,
+        ),
+        CollectiveDecryptionShare::try_from_with_levelled_parameters(
+            &message_b_to_a.decryption_share_b,
+            &params,
+            0,
+        ),
+    ];
+
+    let ciphertext_res = convert_from_proto(&public_output_a_state2.ciphertext_res, &params);
+
+    let psi_output = CollectiveDecryption::aggregate_share_and_decrypt(
+        &params,
+        &ciphertext_res,
+        &decryption_shares_vec,
+    );
+    let psi_output =
+        Vec::<u32>::try_decoding_with_parameters(&psi_output, &params, Encoding::default());
+
+    psi_output
+}
 
 #[cfg(test)]
 mod tests {
@@ -460,41 +542,41 @@ mod tests {
             .collect_vec()
     }
 
-    // #[test]
-    // fn psi_works() {
-    //     let hamming_weight = 10;
-    //     let vector_size = 10;
+    #[test]
+    fn psi_works() {
+        let hamming_weight = 10;
+        let vector_size = 10;
 
-    //     // A: state 0
-    //     let (private_output_a_state0, public_output_a_state0, message_a_to_b_state0) = state0();
+        // A: state 0
+        let (private_output_a_state0, public_output_a_state0, message_a_to_b_state0) = state0();
 
-    //     // B: state  1
-    //     let bit_vector_b = random_bit_vector(hamming_weight, vector_size);
-    //     let (private_output_b_state1, public_output_b_state1, message_b_to_a_state1) =
-    //         state1(message_a_to_b_state0, &bit_vector_b);
+        // B: state  1
+        let bit_vector_b = random_bit_vector(hamming_weight, vector_size);
+        let (private_output_b_state1, public_output_b_state1, message_b_to_a_state1) =
+            state1(message_a_to_b_state0, &bit_vector_b);
 
-    //     // A: state 2
-    //     let bit_vector_a = random_bit_vector(hamming_weight, vector_size);
-    //     let (public_output_a_state2, message_a_to_b_state2) = state2(
-    //         private_output_a_state0,
-    //         public_output_a_state0,
-    //         message_b_to_a_state1,
-    //         &bit_vector_a,
-    //     );
+        // A: state 2
+        let bit_vector_a = random_bit_vector(hamming_weight, vector_size);
+        let (public_output_a_state2, message_a_to_b_state2) = state2(
+            private_output_a_state0,
+            public_output_a_state0,
+            message_b_to_a_state1,
+            &bit_vector_a,
+        );
 
-    //     // B: state 3
-    //     let (message_b_to_a_state3, psi_output_b) = state3(
-    //         private_output_b_state1,
-    //         public_output_b_state1,
-    //         message_a_to_b_state2,
-    //     );
+        // B: state 3
+        let (message_b_to_a_state3, psi_output_b) = state3(
+            private_output_b_state1,
+            public_output_b_state1,
+            message_a_to_b_state2,
+        );
 
-    //     // A: state 4
-    //     let psi_output_a = state4(public_output_a_state2, message_b_to_a_state3);
+        // A: state 4
+        let psi_output_a = state4(public_output_a_state2, message_b_to_a_state3);
 
-    //     let expected_psi_output = plain_psi(&bit_vector_a, &bit_vector_b);
+        let expected_psi_output = plain_psi(&bit_vector_a, &bit_vector_b);
 
-    //     assert_eq!(expected_psi_output, psi_output_a[..vector_size]);
-    //     assert_eq!(psi_output_a, psi_output_b);
-    // }
+        assert_eq!(expected_psi_output, psi_output_a[..vector_size]);
+        assert_eq!(psi_output_a, psi_output_b);
+    }
 }
