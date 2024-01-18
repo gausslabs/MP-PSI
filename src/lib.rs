@@ -1,9 +1,11 @@
 use bfv::{
-    BfvParameters, Ciphertext, CollectiveDecryption, CollectivePublicKeyGenerator,
-    CollectiveRlkGenerator, CollectiveRlkGeneratorState, Encoding, EvaluationKey, Evaluator,
-    Plaintext, Poly, SecretKey, SecretKeyProto,
+    BfvParameters, Ciphertext, CiphertextProto, CollectiveDecryption, CollectiveDecryptionShare,
+    CollectivePublicKeyGenerator, CollectivePublicKeyShare, CollectiveRlkAggTrimmedShare1,
+    CollectiveRlkGenerator, CollectiveRlkGeneratorState, CollectiveRlkShare1, CollectiveRlkShare2,
+    Encoding, EvaluationKey, Evaluator, Plaintext, Poly, SecretKey, SecretKeyProto,
 };
 use rand::thread_rng;
+use serde::{Deserialize, Serialize};
 use traits::{TryDecodingWithParameters, TryEncodingWithParameters, TryFromWithParameters};
 use wasm_bindgen::prelude::wasm_bindgen;
 
@@ -17,70 +19,79 @@ fn params() -> BfvParameters {
     params
 }
 
+// #[derive(Serialize, Deserialize)]
 struct PrivateOutputAPostState0 {
     s_pk_a: SecretKey,
     s_rlk_a: SecretKey,
 }
 
+// #[derive(Serialize, Deserialize)]
 struct PublicOutputAPostState0 {
-    share_pk_a: Poly,
-    share_rlk_a_round1: (Vec<Poly>, Vec<Poly>),
+    share_pk_a: CollectivePublicKeyShare,
+    share_rlk_a_round1: CollectiveRlkShare1,
 }
 
+// #[derive(Serialize, Deserialize)]
 struct MessageAToBPostState0 {
-    share_pk_a: Poly,
-    share_rlk_a_round1: (Vec<Poly>, Vec<Poly>),
+    share_pk_a: CollectivePublicKeyShare,
+    share_rlk_a_round1: CollectiveRlkShare1,
 }
 
+// #[derive(Serialize, Deserialize)]
 struct PrivateOutputBPostState1 {
     s_pk_b: SecretKey,
 }
 
+// #[derive(Serialize, Deserialize)]
 struct PublicOutputBPostState1 {
     ciphertext_b: Ciphertext,
-    share_rlk_b_round2: (Vec<Poly>, Vec<Poly>),
-    rlk_agg_round1_h1s: Vec<Poly>,
+    share_rlk_b_round2: CollectiveRlkShare2,
+    rlk_agg_round1_h1s: CollectiveRlkAggTrimmedShare1,
 }
 
+// #[derive(Serialize, Deserialize)]
 struct MessageBToAPostState1 {
-    share_pk_b: Poly,
-    share_rlk_b_round1: (Vec<Poly>, Vec<Poly>),
-    share_rlk_b_round2: (Vec<Poly>, Vec<Poly>),
+    share_pk_b: CollectivePublicKeyShare,
+    share_rlk_b_round1: CollectiveRlkShare1,
+    share_rlk_b_round2: CollectiveRlkShare2,
     ciphertext_b: Ciphertext,
 }
 
+// #[derive(Serialize, Deserialize)]
 struct PublicOutputAPostState2 {
-    decryption_share_a: Poly,
+    decryption_share_a: CollectiveDecryptionShare,
     ciphertext_res: Ciphertext,
 }
 
+// #[derive(Serialize, Deserialize)]
 struct MessageAToBPostState2 {
-    decryption_share_a: Poly,
+    decryption_share_a: CollectiveDecryptionShare,
     ciphertext_a: Ciphertext,
-    share_rlk_a_round2: (Vec<Poly>, Vec<Poly>),
+    share_rlk_a_round2: CollectiveRlkShare2,
 }
 
+// #[derive(Serialize, Deserialize)]
 struct MessageBToAPostState3 {
-    decryption_share_b: Poly,
+    decryption_share_b: CollectiveDecryptionShare,
 }
 
-#[wasm_bindgen]
-pub fn state0_serialized() -> Vec<u8> {
-    let (private_output_a_state_0, _, _) = state0();
+// #[wasm_bindgen]
+// pub fn state0_serialized() -> Vec<u8> {
+//     let (private_output_a_state_0, _, _) = state0();
 
-    let s_pk_a_serialized =
-        SecretKeyProto::try_from_with_parameters(&private_output_a_state_0.s_pk_a, &params())
-            .coefficients;
+//     let s_pk_a_serialized =
+//         SecretKeyProto::try_from_with_parameters(&private_output_a_state_0.s_pk_a, &params())
+//             .coefficients;
 
-    let s_rlk_a_serialized =
-        SecretKeyProto::try_from_with_parameters(&private_output_a_state_0.s_rlk_a, &params())
-            .coefficients;
+//     let s_rlk_a_serialized =
+//         SecretKeyProto::try_from_with_parameters(&private_output_a_state_0.s_rlk_a, &params())
+//             .coefficients;
 
-    let mut output_serialized = s_pk_a_serialized;
-    output_serialized.extend(s_rlk_a_serialized);
+//     let mut output_serialized = s_pk_a_serialized;
+//     output_serialized.extend(s_rlk_a_serialized);
 
-    output_serialized
-}
+//     output_serialized
+// }
 
 fn state0() -> (
     PrivateOutputAPostState0,
@@ -90,6 +101,7 @@ fn state0() -> (
     let params = params();
     let mut rng = thread_rng();
     let s_pk_a = SecretKey::random_with_params(&params, &mut rng);
+
     let s_rlk_a = CollectiveRlkGenerator::init_state(&params, &mut rng);
 
     let share_pk_a =
@@ -105,7 +117,7 @@ fn state0() -> (
 
     let private_state_a = PrivateOutputAPostState0 {
         s_pk_a,
-        s_rlk_a: s_rlk_a.0.clone(),
+        s_rlk_a: s_rlk_a,
     };
     let public_output_a = PublicOutputAPostState0 {
         share_pk_a,
@@ -135,25 +147,15 @@ fn state1(
         CollectiveRlkGenerator::generate_share_1(&params, &s_pk_b, &s_rlk_b, CRS_RLK, 0, &mut rng);
 
     // rlk key part 1
-    let h0s = vec![
-        message_from_a.share_rlk_a_round1.0,
-        share_rlk_b_round1.0.clone(),
+    let rlk_shares_round1 = vec![
+        message_from_a.share_rlk_a_round1,
+        share_rlk_b_round1.clone(),
     ];
-    let h1s = vec![
-        message_from_a.share_rlk_a_round1.1,
-        share_rlk_b_round1.1.clone(),
-    ];
-    let rlk_agg_1 = CollectiveRlkGenerator::aggregate_shares_1(&params, &h0s, &h1s, 0);
+    let rlk_agg_1 = CollectiveRlkGenerator::aggregate_shares_1(&params, &rlk_shares_round1, 0);
 
     // B already has access to aggregate shares for rlk round 1 and can proceed with the second round of the protocol
     let share_rlk_b_round2 = CollectiveRlkGenerator::generate_share_2(
-        &params,
-        &s_pk_b,
-        &rlk_agg_1.0,
-        &rlk_agg_1.1,
-        &s_rlk_b,
-        0,
-        &mut rng,
+        &params, &s_pk_b, &rlk_agg_1, &s_rlk_b, 0, &mut rng,
     );
 
     // generate collective public key and encryt b's input
@@ -174,10 +176,12 @@ fn state1(
     };
 
     let private_output_b = PrivateOutputBPostState1 { s_pk_b };
+
+    let rlk_aggregated_shares1_trimmed = rlk_agg_1.trim();
     let public_output_b = PublicOutputBPostState1 {
         ciphertext_b,
         share_rlk_b_round2,
-        rlk_agg_round1_h1s: rlk_agg_1.1,
+        rlk_agg_round1_h1s: rlk_aggregated_shares1_trimmed,
     };
 
     (private_output_b, public_output_b, message_to_a)
@@ -193,41 +197,32 @@ fn state2(
     let mut rng = thread_rng();
 
     // aggrgegate shares of rlk round 1
-    let h0s = vec![
-        public_output_a_state0.share_rlk_a_round1.0,
-        message_from_b.share_rlk_b_round1.0,
+    let rlk_shares_round1 = vec![
+        public_output_a_state0.share_rlk_a_round1,
+        message_from_b.share_rlk_b_round1,
     ];
-    let h1s = vec![
-        public_output_a_state0.share_rlk_a_round1.1,
-        message_from_b.share_rlk_b_round1.1,
-    ];
-    let rlk_agg_1 = CollectiveRlkGenerator::aggregate_shares_1(&params, &h0s, &h1s, 0);
+    let rlk_agg_1 = CollectiveRlkGenerator::aggregate_shares_1(&params, &rlk_shares_round1, 0);
 
     // generate share 2 for rlk round 2
     let share_rlk_a_round2 = CollectiveRlkGenerator::generate_share_2(
         &params,
         &private_output_a_state0.s_pk_a,
-        &rlk_agg_1.0,
-        &rlk_agg_1.1,
-        &CollectiveRlkGeneratorState(private_output_a_state0.s_rlk_a),
+        &rlk_agg_1,
+        &private_output_a_state0.s_rlk_a,
         0,
         &mut rng,
     );
 
+    let rlk_agg_1_trimmed = rlk_agg_1.trim();
     // aggregate rlk round 2 shares and generate rlk
-    let h0_dash_shares = vec![
-        share_rlk_a_round2.0.clone(),
-        message_from_b.share_rlk_b_round2.0,
-    ];
-    let h1_dash_shares = vec![
-        share_rlk_a_round2.1.clone(),
-        message_from_b.share_rlk_b_round2.1,
+    let rlk_shares_round2 = vec![
+        share_rlk_a_round2.clone(),
+        message_from_b.share_rlk_b_round2,
     ];
     let rlk = CollectiveRlkGenerator::aggregate_shares_2(
         &params,
-        &h0_dash_shares,
-        &h1_dash_shares,
-        rlk_agg_1.1,
+        &rlk_shares_round2,
+        rlk_agg_1_trimmed,
         0,
     );
 
@@ -278,18 +273,13 @@ fn state3(
     let mut rng = thread_rng();
 
     // create rlk
-    let h0_dash_shares = vec![
-        message_from_a.share_rlk_a_round2.0,
-        public_output_b_state1.share_rlk_b_round2.0,
-    ];
-    let h1_dash_shares = vec![
-        message_from_a.share_rlk_a_round2.1,
-        public_output_b_state1.share_rlk_b_round2.1,
+    let rlk_shares_round2 = vec![
+        message_from_a.share_rlk_a_round2,
+        public_output_b_state1.share_rlk_b_round2,
     ];
     let rlk = CollectiveRlkGenerator::aggregate_shares_2(
         &params,
-        &h0_dash_shares,
-        &h1_dash_shares,
+        &rlk_shares_round2,
         public_output_b_state1.rlk_agg_round1_h1s,
         0,
     );
