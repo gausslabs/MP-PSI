@@ -6,16 +6,30 @@
   </head>
   <body>
     <script type="module">
-      import init, { state0_serialized } from "./pkg/mp_psi.js";
+      import init, { state0_bindgen, state1_bindgen } from "./pkg/mp_psi.js";
+
+      function randomBitVector(hammingWeight, size) {
+        let bitVector = new Array(size).fill(0);
+
+        for (let i = 0; i < hammingWeight; i++) {
+            let sampleIndex;
+            do {
+                sampleIndex = Math.floor(Math.random() * size);
+            } while (bitVector[sampleIndex] === 1);
+
+            bitVector[sampleIndex] = 1;
+        }
+        return bitVector;
+      }
+
       init().then(() => {
-        const private_output_a_state_0 = state0_serialized();
-        // slice the array into 2 arrays of 513 elements each
-        const s_pk_a = private_output_a_state_0.slice(0, 513);
-        const s_rlk_a = private_output_a_state_0.slice(513, 1026);
-        print("s_pk_a", s_pk_a);
-        print("length of s_pk_a", s_pk_a.length)
-        print("s_rlk_a", s_rlk_a);
-        print("length of s_rlk_a", s_rlk_a.length)
+        const state0 = state0_bindgen();        
+        // Generate a random bit vector
+        const hammingWeight = 3;
+        const size = 10;
+        const bitVector = randomBitVector(hammingWeight, size);
+        const state1 = state1_bindgen(state0.message_a_to_b, bitVector);
+        console.log(state1)
       });
     </script>
   </body>

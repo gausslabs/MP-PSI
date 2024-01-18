@@ -1,17 +1,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
-* @returns {Uint8Array}
+* @returns {any}
 */
-export function state0_serialized(): Uint8Array;
+export function state0_bindgen(): any;
+/**
+* @param {any} message_from_a
+* @param {Uint32Array} bit_vector
+* @returns {any}
+*/
+export function state1_bindgen(message_from_a: any, bit_vector: Uint32Array): any;
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
-  readonly state0_serialized: (a: number) => void;
-  readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
-  readonly __wbindgen_free: (a: number, b: number, c: number) => void;
+  readonly state0_bindgen: () => number;
+  readonly state1_bindgen: (a: number, b: number, c: number) => number;
+  readonly __wbindgen_malloc: (a: number, b: number) => number;
+  readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
   readonly __wbindgen_exn_store: (a: number) => void;
 }
 
