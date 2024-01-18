@@ -21,6 +21,22 @@ fn params() -> BfvParameters {
     params
 }
 
+fn convert_to_proto<T, U>(value: &T, parameters: &T::Parameters) -> U
+where
+    T: TryFromWithParameters<Value = U, Parameters = BfvParameters>,
+    U: TryFromWithParameters<Value = T, Parameters = BfvParameters>,
+{
+    U::try_from_with_parameters(value, parameters)
+}
+
+fn convert_from_proto<T, U>(proto: &U, parameters: &U::Parameters) -> T
+where
+    U: TryFromWithParameters<Value = T, Parameters = BfvParameters>,
+    T: TryFromWithParameters<Value = U, Parameters = BfvParameters>,
+{
+    T::try_from_with_parameters(proto, parameters)
+}
+
 #[derive(Serialize, Deserialize)]
 struct PrivateOutputAPostState0 {
     s_pk_a: SecretKeyProto,
@@ -122,23 +138,17 @@ fn state0() -> (
         CollectiveRlkGenerator::generate_share_1(&params, &s_pk_a, &s_rlk_a, CRS_RLK, 0, &mut rng);
 
     let message_a_to_b = MessageAToBPostState0 {
-        share_pk_a: CollectivePublicKeyShareProto::try_from_with_parameters(&share_pk_a, &params),
-        share_rlk_a_round1: CollectiveRlkShare1Proto::try_from_with_parameters(
-            &share_rlk_a_round1,
-            &params,
-        ),
+        share_pk_a: convert_to_proto(&share_pk_a, &params),
+        share_rlk_a_round1: convert_to_proto(&share_rlk_a_round1, &params),
     };
 
     let private_output_a = PrivateOutputAPostState0 {
-        s_pk_a: SecretKeyProto::try_from_with_parameters(&s_pk_a, &params),
-        s_rlk_a: SecretKeyProto::try_from_with_parameters(&s_rlk_a, &params),
+        s_pk_a: convert_to_proto(&s_pk_a, &params),
+        s_rlk_a: convert_to_proto(&s_rlk_a, &params),
     };
     let public_output_a = PublicOutputAPostState0 {
-        share_pk_a: CollectivePublicKeyShareProto::try_from_with_parameters(&share_pk_a, &params),
-        share_rlk_a_round1: CollectiveRlkShare1Proto::try_from_with_parameters(
-            &share_rlk_a_round1,
-            &params,
-        ),
+        share_pk_a: convert_to_proto(&share_pk_a, &params),
+        share_rlk_a_round1: convert_to_proto(&share_rlk_a_round1, &params),
     };
 
     (private_output_a, public_output_a, message_a_to_b)
@@ -179,11 +189,9 @@ fn state1(
     let share_rlk_b_round1 =
         CollectiveRlkGenerator::generate_share_1(&params, &s_pk_b, &s_rlk_b, CRS_RLK, 0, &mut rng);
 
-    let share_rlk_a_round1 =
-        CollectiveRlkShare1::try_from_with_parameters(&message_from_a.share_rlk_a_round1, &params);
+    let share_rlk_a_round1 = convert_from_proto(&message_from_a.share_rlk_a_round1, &params);
 
-    let share_pk_a =
-        CollectivePublicKeyShare::try_from_with_parameters(&message_from_a.share_pk_a, &params);
+    let share_pk_a = convert_from_proto(&message_from_a.share_pk_a, &params);
 
     // rlk key part 1
     let rlk_shares_round1 = vec![share_rlk_a_round1, share_rlk_b_round1.clone()];
@@ -205,33 +213,21 @@ fn state1(
     let ciphertext_b = collecitve_pk.encrypt(&params, &pt, &mut rng);
 
     let message_to_a = MessageBToAPostState1 {
-        share_pk_b: CollectivePublicKeyShareProto::try_from_with_parameters(&share_pk_b, &params),
-        share_rlk_b_round1: CollectiveRlkShare1Proto::try_from_with_parameters(
-            &share_rlk_b_round1,
-            &params,
-        ),
-        share_rlk_b_round2: CollectiveRlkShare2Proto::try_from_with_parameters(
-            &share_rlk_b_round2,
-            &params,
-        ),
-        ciphertext_b: CiphertextProto::try_from_with_parameters(&ciphertext_b, &params),
+        share_pk_b: convert_to_proto(&share_pk_b, &params),
+        share_rlk_b_round1: convert_to_proto(&share_rlk_b_round1, &params),
+        share_rlk_b_round2: convert_to_proto(&share_rlk_b_round2, &params),
+        ciphertext_b: convert_to_proto(&ciphertext_b, &params),
     };
 
     let private_output_b = PrivateOutputBPostState1 {
-        s_pk_b: SecretKeyProto::try_from_with_parameters(&s_pk_b, &params),
+        s_pk_b: convert_to_proto(&s_pk_b, &params),
     };
 
     let rlk_aggregated_shares1_trimmed = rlk_agg_1.trim();
     let public_output_b = PublicOutputBPostState1 {
-        ciphertext_b: CiphertextProto::try_from_with_parameters(&ciphertext_b, &params),
-        share_rlk_b_round2: CollectiveRlkShare2Proto::try_from_with_parameters(
-            &share_rlk_b_round2,
-            &params,
-        ),
-        rlk_agg_round1_h1s: CollectiveRlkAggTrimmedShare1Proto::try_from_with_parameters(
-            &rlk_aggregated_shares1_trimmed,
-            &params,
-        ),
+        ciphertext_b: convert_to_proto(&ciphertext_b, &params),
+        share_rlk_b_round2: convert_to_proto(&share_rlk_b_round2, &params),
+        rlk_agg_round1_h1s: convert_to_proto(&rlk_aggregated_shares1_trimmed, &params),
     };
 
     (private_output_b, public_output_b, message_to_a)
