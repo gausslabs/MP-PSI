@@ -5,11 +5,19 @@
 */
 export function state0_bindgen(): any;
 /**
-* @param {any} message_from_a
+* @param {any} message_a_to_b
 * @param {Uint32Array} bit_vector
 * @returns {any}
 */
-export function state1_bindgen(message_from_a: any, bit_vector: Uint32Array): any;
+export function state1_bindgen(message_a_to_b: any, bit_vector: Uint32Array): any;
+/**
+* @param {any} private_output_a_state0
+* @param {any} public_output_a_state0
+* @param {any} message_b_to_a
+* @param {Uint32Array} bit_vector
+* @returns {any}
+*/
+export function state2_bindgen(private_output_a_state0: any, public_output_a_state0: any, message_b_to_a: any, bit_vector: Uint32Array): any;
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
@@ -17,6 +25,7 @@ export interface InitOutput {
   readonly memory: WebAssembly.Memory;
   readonly state0_bindgen: () => number;
   readonly state1_bindgen: (a: number, b: number, c: number) => number;
+  readonly state2_bindgen: (a: number, b: number, c: number, d: number, e: number) => number;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
   readonly __wbindgen_exn_store: (a: number) => void;

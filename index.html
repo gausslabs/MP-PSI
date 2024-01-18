@@ -6,7 +6,7 @@
   </head>
   <body>
     <script type="module">
-      import init, { state0_bindgen, state1_bindgen } from "./pkg/mp_psi.js";
+      import init, { state0_bindgen, state1_bindgen, state2_bindgen } from "./pkg/mp_psi.js";
 
       function randomBitVector(hammingWeight, size) {
         let bitVector = new Array(size).fill(0);
@@ -29,7 +29,14 @@
         const size = 10;
         const bitVector = randomBitVector(hammingWeight, size);
         const state1 = state1_bindgen(state0.message_a_to_b, bitVector);
+        const bitVector2 = randomBitVector(hammingWeight, size);
         console.log(state1)
+        console.log(bitVector2);
+        console.log(state0.private_output_a);
+        console.log(state0.public_output_a);
+        console.log(state1.message_b_to_a);
+        const state2 = state2_bindgen(state0.private_output_a, state0.public_output_a, state1.message_b_to_a, bitVector2);
+        console.log(state2);
       });
     </script>
   </body>

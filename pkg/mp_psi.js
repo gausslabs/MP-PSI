@@ -212,14 +212,28 @@ function passArray32ToWasm0(arg, malloc) {
     return ptr;
 }
 /**
-* @param {any} message_from_a
+* @param {any} message_a_to_b
 * @param {Uint32Array} bit_vector
 * @returns {any}
 */
-export function state1_bindgen(message_from_a, bit_vector) {
+export function state1_bindgen(message_a_to_b, bit_vector) {
     const ptr0 = passArray32ToWasm0(bit_vector, wasm.__wbindgen_malloc);
     const len0 = WASM_VECTOR_LEN;
-    const ret = wasm.state1_bindgen(addHeapObject(message_from_a), ptr0, len0);
+    const ret = wasm.state1_bindgen(addHeapObject(message_a_to_b), ptr0, len0);
+    return takeObject(ret);
+}
+
+/**
+* @param {any} private_output_a_state0
+* @param {any} public_output_a_state0
+* @param {any} message_b_to_a
+* @param {Uint32Array} bit_vector
+* @returns {any}
+*/
+export function state2_bindgen(private_output_a_state0, public_output_a_state0, message_b_to_a, bit_vector) {
+    const ptr0 = passArray32ToWasm0(bit_vector, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.state2_bindgen(addHeapObject(private_output_a_state0), addHeapObject(public_output_a_state0), addHeapObject(message_b_to_a), ptr0, len0);
     return takeObject(ret);
 }
 
