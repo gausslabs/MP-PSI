@@ -76,7 +76,7 @@ struct MessageBToAPostState3 {
 }
 
 // #[wasm_bindgen]
-// pub fn state0_serialized() -> Vec<u8> {
+// pub fn state0_serialized() -> (Vec<u8>, Vec<u8>) {
 //     let (private_output_a_state_0, _, _) = state0();
 
 //     let s_pk_a_serialized =

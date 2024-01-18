@@ -12,8 +12,8 @@ crate-type = ["cdylib"]
 default = ["console_error_panic_hook"]
 
 [dependencies]
-bfv = {path = "./../bfv/bfv", features=["serialize", "std"]}
-traits = {path = "./../bfv/traits"}
+bfv = {git = "https://github.com/Janmajayamall/bfv.git", features=["serialize", "std"], branch = "wasm"}
+traits =  {git = "https://github.com/Janmajayamall/bfv.git", branch = "wasm"}
 rand = "0.8.5"
 itertools = "0.10.5"
 wasm-bindgen = "0.2"
