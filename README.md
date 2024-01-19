@@ -1,8 +1,22 @@
-Multi-party PSI using Multi-party BFV
+# MP-PSI
 
-### Guide
+The library contains the following components:
 
-- Wasm and JS/TS bindings built using `wasm-pack` [guide](https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_Wasm)
+- `src`: Rust library for multi-party PSI using BFV
+- `pkg`: JS-TS-WASM package 
 
-- [ ] Extend serialization to `state0`, `state1`, `state2`, `state3` and `state4`
-- [ ] Test the full flow in the HTML file
+### Build 
+
+The rust library is used to build the JS-TS-WASM package using `wasm-pack` [guide](https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_Wasm)
+
+```bash
+wasm-pack build --target nodejs
+```
+
+### Test
+
+To test the rust library, run:
+
+```bash
+cargo test
+```
