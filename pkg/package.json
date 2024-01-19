@@ -1,0 +1,11 @@
+{
+  "name": "mp-psi",
+  "version": "0.1.6",
+  "files": [
+    "mp_psi_bg.wasm",
+    "mp_psi.js",
+    "mp_psi.d.ts"
+  ],
+  "main": "mp_psi.js",
+  "types": "mp_psi.d.ts"
+}
