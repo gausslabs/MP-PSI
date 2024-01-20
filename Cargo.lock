@@ -32,7 +32,7 @@ checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 [[package]]
 name = "bfv"
 version = "0.1.0"
-source = "git+https://github.com/Janmajayamall/bfv.git?branch=wasm#55181279cf5701d9706a92cb87f345573e8f9af4"
+source = "git+https://github.com/Janmajayamall/bfv.git?branch=wasm#0bc0446cfcd4902732f6b20e71dda12d15d7c9e8"
 dependencies = [
  "concrete-ntt",
  "crypto-bigint",
@@ -757,7 +757,7 @@ dependencies = [
 [[package]]
 name = "traits"
 version = "0.1.0"
-source = "git+https://github.com/Janmajayamall/bfv.git?branch=wasm#55181279cf5701d9706a92cb87f345573e8f9af4"
+source = "git+https://github.com/Janmajayamall/bfv.git?branch=wasm#0bc0446cfcd4902732f6b20e71dda12d15d7c9e8"
 
 [[package]]
 name = "typetag"

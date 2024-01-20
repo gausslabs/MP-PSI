@@ -13,12 +13,17 @@ use traits::{
 };
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
-static CRS_PK: [u8; 32] = [0u8; 32];
+static CRS_PK: [u8; 32] = [11u8; 32];
 static CRS_RLK: [u8; 32] = [0u8; 32];
 
 fn params() -> BfvParameters {
-    let mut params = BfvParameters::new(&[30, 30], 65537, 1 << 11);
-    params.enable_hybrid_key_switching(&[30]);
+    let mut params = BfvParameters::new_with_primes(
+        vec![1032193, 1073692673],
+        vec![995329, 1073668097],
+        40961,
+        1 << 11,
+    );
+    params.enable_hybrid_key_switching_with_prime(vec![61441]);
     params.enable_pke();
     params
 }
