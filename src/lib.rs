@@ -16,32 +16,25 @@ use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 static CRS_PK: [u8; 32] = [11u8; 32];
 static CRS_RLK: [u8; 32] = [0u8; 32];
 
+static RING_SIZE: usize = 1 << 11;
+
 fn params() -> BfvParameters {
     let mut params = BfvParameters::new_with_primes(
         vec![1032193, 1073692673],
         vec![995329, 1073668097],
         40961,
-        1 << 11,
+        RING_SIZE,
     );
     params.enable_hybrid_key_switching_with_prime(vec![61441]);
     params.enable_pke();
     params
 }
 
-fn convert_to_proto<T, U>(value: &T, parameters: &T::Parameters) -> U
+fn convert<T, U>(value: &T, parameters: &BfvParameters) -> U
 where
-    T: TryFromWithParameters<Value = U, Parameters = BfvParameters>,
     U: TryFromWithParameters<Value = T, Parameters = BfvParameters>,
 {
     U::try_from_with_parameters(value, parameters)
-}
-
-fn convert_from_proto<T, U>(proto: &U, parameters: &U::Parameters) -> T
-where
-    U: TryFromWithParameters<Value = T, Parameters = BfvParameters>,
-    T: TryFromWithParameters<Value = U, Parameters = BfvParameters>,
-{
-    T::try_from_with_parameters(proto, parameters)
 }
 
 #[derive(Serialize, Deserialize)]
@@ -157,17 +150,17 @@ fn state0() -> (
         CollectiveRlkGenerator::generate_share_1(&params, &s_pk_a, &s_rlk_a, CRS_RLK, 0, &mut rng);
 
     let message_a_to_b = MessageAToBPostState0 {
-        share_pk_a: convert_to_proto(&share_pk_a, &params),
-        share_rlk_a_round1: convert_to_proto(&share_rlk_a_round1, &params),
+        share_pk_a: convert(&share_pk_a, &params),
+        share_rlk_a_round1: convert(&share_rlk_a_round1, &params),
     };
 
     let private_output_a = PrivateOutputAPostState0 {
-        s_pk_a: convert_to_proto(&s_pk_a, &params),
-        s_rlk_a: convert_to_proto(&s_rlk_a, &params),
+        s_pk_a: convert(&s_pk_a, &params),
+        s_rlk_a: convert(&s_rlk_a, &params),
     };
     let public_output_a = PublicOutputAPostState0 {
-        share_pk_a: convert_to_proto(&share_pk_a, &params),
-        share_rlk_a_round1: convert_to_proto(&share_rlk_a_round1, &params),
+        share_pk_a: convert(&share_pk_a, &params),
+        share_rlk_a_round1: convert(&share_rlk_a_round1, &params),
     };
 
     (private_output_a, public_output_a, message_a_to_b)
@@ -208,9 +201,9 @@ fn state1(
     let share_rlk_b_round1 =
         CollectiveRlkGenerator::generate_share_1(&params, &s_pk_b, &s_rlk_b, CRS_RLK, 0, &mut rng);
 
-    let share_rlk_a_round1 = convert_from_proto(&message_a_to_b.share_rlk_a_round1, &params);
+    let share_rlk_a_round1 = convert(&message_a_to_b.share_rlk_a_round1, &params);
 
-    let share_pk_a = convert_from_proto(&message_a_to_b.share_pk_a, &params);
+    let share_pk_a = convert(&message_a_to_b.share_pk_a, &params);
 
     // rlk key part 1
     let rlk_shares_round1 = vec![share_rlk_a_round1, share_rlk_b_round1.clone()];
@@ -232,21 +225,21 @@ fn state1(
     let ciphertext_b = collecitve_pk.encrypt(&params, &pt, &mut rng);
 
     let message_b_to_a = MessageBToAPostState1 {
-        share_pk_b: convert_to_proto(&share_pk_b, &params),
-        share_rlk_b_round1: convert_to_proto(&share_rlk_b_round1, &params),
-        share_rlk_b_round2: convert_to_proto(&share_rlk_b_round2, &params),
-        ciphertext_b: convert_to_proto(&ciphertext_b, &params),
+        share_pk_b: convert(&share_pk_b, &params),
+        share_rlk_b_round1: convert(&share_rlk_b_round1, &params),
+        share_rlk_b_round2: convert(&share_rlk_b_round2, &params),
+        ciphertext_b: convert(&ciphertext_b, &params),
     };
 
     let private_output_b = PrivateOutputBPostState1 {
-        s_pk_b: convert_to_proto(&s_pk_b, &params),
+        s_pk_b: convert(&s_pk_b, &params),
     };
 
     let rlk_aggregated_shares1_trimmed = rlk_agg_1.trim();
     let public_output_b = PublicOutputBPostState1 {
-        ciphertext_b: convert_to_proto(&ciphertext_b, &params),
-        share_rlk_b_round2: convert_to_proto(&share_rlk_b_round2, &params),
-        rlk_agg_round1_h1s: convert_to_proto(&rlk_aggregated_shares1_trimmed, &params),
+        ciphertext_b: convert(&ciphertext_b, &params),
+        share_rlk_b_round2: convert(&share_rlk_b_round2, &params),
+        rlk_agg_round1_h1s: convert(&rlk_aggregated_shares1_trimmed, &params),
     };
 
     (private_output_b, public_output_b, message_b_to_a)
@@ -296,13 +289,13 @@ fn state2(
 
     // aggrgegate shares of rlk round 1
     let rlk_shares_round1 = vec![
-        convert_from_proto(&public_output_a_state0.share_rlk_a_round1, &params),
-        convert_from_proto(&message_b_to_a.share_rlk_b_round1, &params),
+        convert(&public_output_a_state0.share_rlk_a_round1, &params),
+        convert(&message_b_to_a.share_rlk_b_round1, &params),
     ];
     let rlk_agg_1 = CollectiveRlkGenerator::aggregate_shares_1(&params, &rlk_shares_round1, 0);
 
-    let s_pk_a = convert_from_proto(&private_output_a_state0.s_pk_a, &params);
-    let s_rlk_a = convert_from_proto(&private_output_a_state0.s_rlk_a, &params);
+    let s_pk_a = convert(&private_output_a_state0.s_pk_a, &params);
+    let s_rlk_a = convert(&private_output_a_state0.s_rlk_a, &params);
 
     // generate share 2 for rlk round 2
     let share_rlk_a_round2 = CollectiveRlkGenerator::generate_share_2(
@@ -313,7 +306,7 @@ fn state2(
     // aggregate rlk round 2 shares and generate rlk
     let rlk_shares_round2 = vec![
         share_rlk_a_round2.clone(),
-        convert_from_proto(&message_b_to_a.share_rlk_b_round2, &params),
+        convert(&message_b_to_a.share_rlk_b_round2, &params),
     ];
     let rlk = CollectiveRlkGenerator::aggregate_shares_2(
         &params,
@@ -323,8 +316,8 @@ fn state2(
     );
     // create public key and encrypt A's bit vector'
     let collective_pk_shares = vec![
-        convert_from_proto(&public_output_a_state0.share_pk_a, &params),
-        convert_from_proto(&message_b_to_a.share_pk_b, &params),
+        convert(&public_output_a_state0.share_pk_a, &params),
+        convert(&message_b_to_a.share_pk_b, &params),
     ];
     let collective_pk = CollectivePublicKeyGenerator::aggregate_shares_and_finalise(
         &params,
@@ -337,7 +330,7 @@ fn state2(
     // perform PSI
     let evaluator = Evaluator::new(params.clone());
     let evaluation_key = EvaluationKey::new_raw(&[0], vec![rlk], &[], &[], vec![]);
-    let ciphertext_b = convert_from_proto(&message_b_to_a.ciphertext_b, &params);
+    let ciphertext_b = convert(&message_b_to_a.ciphertext_b, &params);
     let ciphertext_res = evaluator.mul(&ciphertext_a, &ciphertext_b);
     let ciphertext_res = evaluator.relinearize(&ciphertext_res, &evaluation_key);
 
@@ -345,7 +338,7 @@ fn state2(
     let decryption_share_a = CollectiveDecryption::generate_share(
         evaluator.params(),
         &ciphertext_res,
-        &convert_from_proto(&private_output_a_state0.s_pk_a, &params),
+        &convert(&private_output_a_state0.s_pk_a, &params),
         &mut rng,
     );
 
@@ -357,13 +350,13 @@ fn state2(
 
     let public_output_a = PublicOutputAPostState2 {
         decryption_share_a: decryption_share_a.clone(),
-        ciphertext_res: convert_to_proto(&ciphertext_res, &params),
+        ciphertext_res: convert(&ciphertext_res, &params),
     };
 
     let message_a_to_b = MessageAToBPostState2 {
         decryption_share_a,
-        ciphertext_a: convert_to_proto(&ciphertext_a, &params),
-        share_rlk_a_round2: convert_to_proto(&share_rlk_a_round2, &params),
+        ciphertext_a: convert(&ciphertext_a, &params),
+        share_rlk_a_round2: convert(&share_rlk_a_round2, &params),
     };
 
     (public_output_a, message_a_to_b)
@@ -410,12 +403,11 @@ fn state3(
 
     // create rlk
     let rlk_shares_round2 = vec![
-        convert_from_proto(&message_a_to_b.share_rlk_a_round2, &params),
-        convert_from_proto(&public_output_b_state1.share_rlk_b_round2, &params),
+        convert(&message_a_to_b.share_rlk_a_round2, &params),
+        convert(&public_output_b_state1.share_rlk_b_round2, &params),
     ];
 
-    let rlk_agg_round1_h1s =
-        convert_from_proto(&public_output_b_state1.rlk_agg_round1_h1s, &params);
+    let rlk_agg_round1_h1s = convert(&public_output_b_state1.rlk_agg_round1_h1s, &params);
 
     let rlk = CollectiveRlkGenerator::aggregate_shares_2(
         &params,
@@ -428,13 +420,13 @@ fn state3(
     let evaluator = Evaluator::new(params.clone());
     let evaluation_key = EvaluationKey::new_raw(&[0], vec![rlk], &[], &[], vec![]);
 
-    let ciphertext_a = convert_from_proto(&message_a_to_b.ciphertext_a, &params);
-    let ciphertext_b = convert_from_proto(&public_output_b_state1.ciphertext_b, &params);
+    let ciphertext_a = convert(&message_a_to_b.ciphertext_a, &params);
+    let ciphertext_b = convert(&public_output_b_state1.ciphertext_b, &params);
 
     let ciphertext_res = evaluator.mul(&ciphertext_a, &ciphertext_b);
     let ciphertext_res = evaluator.relinearize(&ciphertext_res, &evaluation_key);
 
-    let s_pk_b = convert_from_proto(&private_output_b_state1.s_pk_b, &params);
+    let s_pk_b = convert(&private_output_b_state1.s_pk_b, &params);
 
     // generate B's decryption share
     let decryption_share_b = CollectiveDecryption::generate_share(
@@ -510,7 +502,7 @@ fn state4(
         ),
     ];
 
-    let ciphertext_res = convert_from_proto(&public_output_a_state2.ciphertext_res, &params);
+    let ciphertext_res = convert(&public_output_a_state2.ciphertext_res, &params);
 
     let psi_output = CollectiveDecryption::aggregate_share_and_decrypt(
         &params,
