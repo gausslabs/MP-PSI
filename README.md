@@ -7,10 +7,10 @@ The library contains the following components:
 
 ### Build 
 
-The rust library is used to build the JS-TS-WASM package using `wasm-pack` [guide](https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_Wasm)
+The rust library is used to build the JS-TS-WASM package using `wasm-pack` targeting `web` [guide](https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_Wasm)
 
 ```bash
-wasm-pack build --target nodejs
+wasm-pack build --target web
 ```
 
 ### Test
