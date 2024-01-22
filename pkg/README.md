@@ -44,6 +44,8 @@ You can test it by:
 - `plaintext_modulus`: `40961`
 - `ring_size`: `2048`
 
+The vector size is set to `ring_size * 3`
+
 **Runtime**
 
 The benchmarks are run on M2 Macbook Pro with 12 cores and 32GB of RAM. The browser used is Brave v1.61.116 Chromium:120.0.6099.217. The benchmark code is also part of `index.html`.
@@ -51,10 +53,10 @@ The benchmarks are run on M2 Macbook Pro with 12 cores and 32GB of RAM. The brow
 | Operation | Time (ms) |
 | ---       | ---       |
 | state 0   | 13.86     |
-| state 1   | 26.75     |
-| state 2   | 30.32     |
-| state 3   | 18.47     |
-| state 4   | 5.20      |
+| state 1   | 33.25     |
+| state 2   | 53.91     |
+| state 3   | 38.12     |
+| state 4   | 11.44     |
 
 **Communication Bandwidth**
 
@@ -63,7 +65,7 @@ The following benchmarks measure the size in terms of bytes of the output of eac
 | Operation | Size (bytes) |
 | ---       | ---          |
 | state 0   | 170016       |
-| state 1   | 237610       |
-| state 2   | 110610       |
-| state 3   | 13570        |
+| state 1   | 288818       |
+| state 2   | 264234       |
+| state 3   | 39174        |
 | state 4   | 768          |

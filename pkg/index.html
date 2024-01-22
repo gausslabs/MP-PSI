@@ -35,9 +35,9 @@
         console.time('state0 Time');
         const state0 = state0_bindgen();
         console.timeEnd('state0 Time');
-
-        const hammingWeight = 3;
-        const size = 10;
+        
+        const hammingWeight = 1000;
+        const size = 2048 * 3;
         const bit_vector_a = randomBitVector(hammingWeight, size);
 
         console.time('state1 Time');

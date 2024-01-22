@@ -598,13 +598,16 @@ mod tests {
 
         println!("byte_count_state0: {}", byte_count_state0);
 
-        // B: state  1
+        // B: state 1
         let bit_vector_b = random_bit_vector(hamming_weight, vector_size);
         let (private_output_b_state1, public_output_b_state1, message_b_to_a_state1) =
             state1(message_a_to_b_state0, &bit_vector_b);
         let mut byte_count_state1 = 0;
         byte_count_state1 += private_output_b_state1.s_pk_b.get_byte_size();
-        byte_count_state1 += public_output_b_state1.ciphertexts_b[0].get_byte_size();
+        byte_count_state1 += public_output_b_state1
+            .ciphertexts_b
+            .iter()
+            .fold(0, |acc, ct| acc + ct.get_byte_size());
         byte_count_state1 += public_output_b_state1.rlk_agg_round1_h1s.get_byte_size();
         byte_count_state1 += public_output_b_state1.share_rlk_b_round2.get_byte_size();
         byte_count_state1 += message_b_to_a_state1.ciphertexts_b[0].get_byte_size();
@@ -628,9 +631,18 @@ mod tests {
             .decryption_shares_a
             .iter()
             .fold(0, |acc, share| acc + share.get_byte_size());
-        byte_count_state2 += public_output_a_state2.ciphertexts_res[0].get_byte_size();
-        byte_count_state2 += message_a_to_b_state2.decryption_shares_a[0].get_byte_size();
-        byte_count_state2 += message_a_to_b_state2.ciphertexts_a[0].get_byte_size();
+        byte_count_state2 += public_output_a_state2
+            .ciphertexts_res
+            .iter()
+            .fold(0, |acc, ct| acc + ct.get_byte_size());
+        byte_count_state2 += message_a_to_b_state2
+            .decryption_shares_a
+            .iter()
+            .fold(0, |acc, share| acc + share.get_byte_size());
+        byte_count_state2 += message_a_to_b_state2
+            .ciphertexts_a
+            .iter()
+            .fold(0, |acc, ct| acc + ct.get_byte_size());
         byte_count_state2 += message_a_to_b_state2.share_rlk_a_round2.get_byte_size();
 
         println!("byte_count_state2: {}", byte_count_state2);
@@ -643,7 +655,10 @@ mod tests {
         );
 
         let mut byte_count_state3 = 0;
-        byte_count_state3 += message_b_to_a_state3.decryption_shares_b[0].get_byte_size();
+        byte_count_state3 += message_b_to_a_state3
+            .decryption_shares_b
+            .iter()
+            .fold(0, |acc, share| acc + share.get_byte_size());
         byte_count_state3 += psi_output_b.len() / 8; // Divide by 8 to account for the fact that it is a bit vector
 
         println!("byte_count_state3: {}", byte_count_state3);
