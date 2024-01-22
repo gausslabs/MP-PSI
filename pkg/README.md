@@ -43,4 +43,8 @@ const psi_output_b = state3.psi_output;
 });
 ```
 
-A web-app example is available in the at `index.html`. Serve the package directory with a local web server, (e.g. `python3 -m http.server`) and visit `http://localhost:8000` in your browser. Opening the console will show the result of the PSI protocol.
+A web-app example is available inside the `pkg/index.html` file [here](https://github.com/gaussian-dev/MP-PSI). You can test it by:
+- Cloning the repo 
+- Serving the `pkg` directory with a local web server, (e.g. `python3 -m http.server`) 
+- Visit `http://localhost:8000` in your browser
+- Open the console. It will show you the result of the PSI protocol.
