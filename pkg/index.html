@@ -32,15 +32,32 @@
       }
 
       init().then(() => {
-        const state0 = state0_bindgen();        
+        console.time('state0 Time');
+        const state0 = state0_bindgen();
+        console.timeEnd('state0 Time');
+
         const hammingWeight = 3;
         const size = 10;
         const bit_vector_a = randomBitVector(hammingWeight, size);
+
+        console.time('state1 Time');
         const state1 = state1_bindgen(state0.message_a_to_b, bit_vector_a);
+        console.timeEnd('state1 Time');
+
         const bit_vector_b = randomBitVector(hammingWeight, size);
+
+        console.time('state2 Time');
         const state2 = state2_bindgen(state0.private_output_a, state0.public_output_a, state1.message_b_to_a, bit_vector_b);
+        console.timeEnd('state2 Time');
+
+        console.time('state3 Time');
         const state3 = state3_bindgen(state1.private_output_b, state1.public_output_b, state2.message_a_to_b);
+        console.timeEnd('state3 Time');        
+        
+        console.time('state4 Time');
         const psi_output_a = state4_bindgen(state2.public_output_a, state3.message_b_to_a);
+        console.timeEnd('state4 Time');
+
         const psi_output_b = state3.psi_output;
         console.log("psi_output_a", psi_output_a)
         console.log("psi_output_b", psi_output_b)

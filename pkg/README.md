@@ -34,3 +34,20 @@ You can test it by:
 - Serving the `pkg` directory with a local web server, (e.g. `python3 -m http.server`) 
 - Visit `http://localhost:8000` in your browser
 - Open the console. It will show you the result of the PSI protocol.
+
+### Benchmarks in web-app
+
+The benchmarks are run on M2 Macbook Pro with 12 cores and 32GB of RAM. The browser used is Brave v1.61.116 Chromium:120.0.6099.217. The benchmark code is also part of `index.html`. The benchmark relates to a PSI protocol based on the following `bfv` parameters:
+
+- `ciphertext_moduli`: `[1032193, 1073692673]`
+- `extension_moduli` : `[995329, 1073668097]`
+- `plaintext_modulus`: `40961`
+- `ring_size`: `2048`
+
+| Operation | Time (ms) |
+| ---       | ---       |
+| state 0   | 13.86     |
+| state 1   | 26.75     |
+| state 2   | 30.32     |
+| state 3   | 18.47     |
+| state 4   | 5.20      |

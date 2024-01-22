@@ -19,5 +19,5 @@ wasm-pack build --target web
 To test the rust library, run:
 
 ```bash
-cargo test
+cargo test --release
 ```
