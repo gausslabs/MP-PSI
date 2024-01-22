@@ -24,18 +24,15 @@
       }
 
       function plainPsi(bitVector0, bitVector1) {
-        // Check if both arrays have the same length
         if (bitVector0.length !== bitVector1.length) {
             throw new Error("Both bit vectors must be of the same length");
         }
 
-        // Perform element-wise multiplication
         return bitVector0.map((element, index) => element * bitVector1[index]);
       }
 
       init().then(() => {
         const state0 = state0_bindgen();        
-        // Generate a random bit vector
         const hammingWeight = 3;
         const size = 10;
         const bit_vector_a = randomBitVector(hammingWeight, size);
