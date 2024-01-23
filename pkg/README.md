@@ -1,6 +1,6 @@
 # MP-PSI
 
-The package contains the APIs to build a multi party private set intersection web-app. Note that the APIs are compiled specifically for web browser environments and are not compatible with a node environment.
+The package contains the APIs to build a multi party private set intersection (MP-PSI) web-app. Note that the APIs are compiled specifically for web browser environments and are not compatible with a node environment.
 
 PSI stands for Private Set Intersection. It allows two parties to compute the intersection of their sets without revealing anything else about their sets. 
 
@@ -37,10 +37,12 @@ You can test it by:
 
 ### `state0_bindgen()`
 
-Called by party A. Returns:
-- `message_a_to_b`: message to be sent from A to B after round 0.
-- `private_output_a`: private output of A after round 0. It has to be privately stored by A.
-- `public_output_a`: public output of A after round 0. It has to be stored by A (not necessarily privately).
+Called by party A. Generates the public key share of A starting from a newly generated secret key. Generates the round 1 relinearization key share of A starting from a newly generated ephermeral key.
+
+Returns:
+- `message_a_to_b`: message to be sent from A to B after round 0. Contains the public key share `share_pk_a` and the round 1 relinearization key share `share_rlk_a_round1`.
+- `private_output_a`: private output of A after round 0. It has to be privately stored by A. Contains the secret key `s_pk_a` behind the public key share and the ephemeral key `s_rlk_a` behind the round 1 relinearization key share.
+- `public_output_a`: public output of A after round 0. It has to be stored by A (not necessarily privately). Contains the public key share `share_pk_a` and the round 1 relinearization key share `share_rlk_a_round1`.
 
 ```js
     const state0 = state0_bindgen();
@@ -49,10 +51,12 @@ Called by party A. Returns:
 
 ### `state1_bindgen(message_a_to_b, bit_vector_b)`
 
-Called by party B after receiving `message_a_to_b` from A. Takes as input `message_a_to_b` and the bit vector of B. This is the bit vector that B wants to find the intersection with the bit vector of A. Returns:
-- `message_b_to_a`: message to be sent from B to A after round 1. 
-- `private_output_b`: private output of B after round 1. It has to be privately stored by B.
-- `public_output_b`: public output of B after round 1. It has to be stored by B (not necessarily privately).
+Called by party B after receiving `message_a_to_b` from A. Takes as input `message_a_to_b` and the plaintext bit vector of B. This is the bit vector that B wants to find the intersection with the bit vector of A. Generates the public key share of B starting from a newly generated secret key. Generates the round 1 relinearization key share of B starting from a newly generated ephermeral key. Aggregates the received round 1 relinearization key share of A, and their own round 1 relinearization key share to generate the round 2 relinearization key share of B. Aggregates the received public key share of A and their own generated public key share to generate the collective public key used for encryption. Encrypts the bit vector of B using the collective public key.
+
+Returns:
+- `message_b_to_a`: message to be sent from B to A after round 1. Contains the public key share `share_pk_b`, the round 1 relinearization key share `share_rlk_b_round1`, the round 2 relinearization key share `share_rlk_b_round2` and the encrypted bit vector `ciphertexts_b`.
+- `private_output_b`: private output of B after round 1. It has to be privately stored by B. Contains the secret key `s_pk_b` behind the public key share.
+- `public_output_b`: public output of B after round 1. It has to be stored by B (not necessarily privately). Contains the encrypted bit vector `ciphertexts_b`, the round 2 relinearization key share `share_rlk_b_round2` and the round 1 aggregate relinearization key share `rlk_agg_round1_h1s`.
 
 ```js
     const state1 = state1_bindgen(state0.message_a_to_b, bit_vector_b);
@@ -61,10 +65,12 @@ Called by party B after receiving `message_a_to_b` from A. Takes as input `messa
 
 ### `state2_bindgen(private_output_a_state0, public_output_a_state0, message_b_to_a, bit_vector_a)`
 
-Called by party A after receiving `message_b_to_a` from B. Takes as input `private_output_a_state0` and `public_output_a_state0` stored by A from state 0, `message_b_to_a` from state 1 and the bit vector of A. This is the bit vector that A wants to find the intersection with the bit vector of B. Returns:
+Called by party A after receiving `message_b_to_a` from B. Takes as input `private_output_a_state0` and `public_output_a_state0` stored by A from state 0, `message_b_to_a` from state 1 and the plaintext bit vector of A. This is the bit vector that A wants to find the intersection with the bit vector of B. Aggregates the received round 1 relinearization key share of B, and their own round 1 relinearization key share to generate the round 2 relinearization key share of A. Aggregates the received round 2 relinearization key share of B, and their own round 2 relinearization key share to generate the collective relinearization key. Aggregates the received public key share of B and their own generated public key share to generate the collective public key used for encryption. Encrypts the bit vector of A using the collective public key. Performs Private Set Intersection (PSI) on the encrypted bit vectors of A and B to get a new ciphertext. The collective relinearization key is used to reduce the size of the ciphertext. Perform partial decryption of the ciphertext (result of the PSI) using their own secret key.
 
-- `message_a_to_b`: message to be sent from A to B after round 2.
-- `public_output_a`: public output of A after round 2. It has to be stored by A (not necessarily privately).
+Returns:
+
+- `message_a_to_b`: message to be sent from A to B after round 2. Contains the partial decryption of the ciphertext (result of the PSI) `decryption_shares_a`, the encrypted bit vector `ciphertexts_a` and the round 2 relinearization key share `share_rlk_a_round2`.
+- `public_output_a`: public output of A after round 2. It has to be stored by A (not necessarily privately). Contains the partial decryption of the ciphertext (result of the PSI) `decryption_shares_a` and the result of the PSI `ciphertexts_res`
 
 ```js
     const state2 = state2_bindgen(state0.private_output_a, state0.public_output_a, state1.message_b_to_a, bit_vector_a);
@@ -73,9 +79,11 @@ Called by party A after receiving `message_b_to_a` from B. Takes as input `priva
 
 ### `state3_bindgen(private_output_b_state1, public_output_b_state1, message_a_to_b)`
 
-Called by party B after receiving `message_a_to_b` from A. Takes as input `private_output_b_state1` and `public_output_b_state1` stored by B from state 1 and `message_a_to_b` from state 2. Returns:
-- `message_b_to_a`: message to be sent from B to A after round 3.
-- `psi_output`: the (decrypted) intersection of the bit vectors of A and B.
+Called by party B after receiving `message_a_to_b` from A. Takes as input `private_output_b_state1` and `public_output_b_state1` stored by B from state 1 and `message_a_to_b` from state 2. Aggregates the received round 2 relinearization key share of A, and their own round 2 relinearization key share to generate the collective relinearization key. Performs Private Set Intersection (PSI) on the encrypted bit vectors of A and B to get a new ciphertext. The collective relinearization key is used to reduce the size of the ciphertext. Performs partial decryption of the ciphertext (result of the PSI) using their own secret key. Aggregates the partial decryption share of A and their own partial decryption share to fully decrypt the ciphertext and obtain the intersection of the two vectors. 
+
+Returns:
+- `message_b_to_a`: message to be sent from B to A after round 3. Contains the partial decryption of the ciphertext (result of the PSI) `decryption_shares_b`. 
+- `psi_output`: the intersection of the bit vectors of A and B.
 
 ```js
     const state3 = state3_bindgen(state1.private_output_b, state1.public_output_b, state2.message_a_to_b);
@@ -84,8 +92,10 @@ Called by party B after receiving `message_a_to_b` from A. Takes as input `priva
 
 ### `state4_bindgen(public_output_a_state2, message_b_to_a)`
 
-Called by party A after receiving `message_b_to_a` from B. Takes as input `public_output_a_state2` stored by A from state 2 and `message_b_to_a` from state 3. Returns:
-- `psi_output`: the (decrypted) intersection of the bit vectors of A and B.
+Called by party A after receiving `message_b_to_a` from B. Takes as input `public_output_a_state2` stored by A from state 2 and `message_b_to_a` from state 3. Aggregates the partial decryption share of B and their own partial decryption share to fully decrypt the ciphertext and obtain the intersection of the two vectors. 
+
+Returns:
+- `psi_output`: the intersection of the bit vectors of A and B.
 
 ```js
     const state4 = state4_bindgen(state2.public_output_a, state3.message_b_to_a);
