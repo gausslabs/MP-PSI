@@ -52,8 +52,8 @@
 
         console.time('state3 Time');
         const state3 = state3_bindgen(state1.private_output_b, state1.public_output_b, state2.message_a_to_b);
-        console.timeEnd('state3 Time');        
-        
+        console.timeEnd('state3 Time');       
+                
         console.time('state4 Time');
         const psi_output_a = state4_bindgen(state2.public_output_a, state3.message_b_to_a);
         console.timeEnd('state4 Time');

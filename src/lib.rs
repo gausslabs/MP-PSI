@@ -610,7 +610,10 @@ mod tests {
             .fold(0, |acc, ct| acc + ct.get_byte_size());
         byte_count_state1 += public_output_b_state1.rlk_agg_round1_h1s.get_byte_size();
         byte_count_state1 += public_output_b_state1.share_rlk_b_round2.get_byte_size();
-        byte_count_state1 += message_b_to_a_state1.ciphertexts_b[0].get_byte_size();
+        byte_count_state1 += message_b_to_a_state1
+            .ciphertexts_b
+            .iter()
+            .fold(0, |acc, ct| acc + ct.get_byte_size());
         byte_count_state1 += message_b_to_a_state1.share_pk_b.get_byte_size();
         byte_count_state1 += message_b_to_a_state1.share_rlk_b_round1.get_byte_size();
         byte_count_state1 += message_b_to_a_state1.share_rlk_b_round2.get_byte_size();

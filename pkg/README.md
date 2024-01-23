@@ -37,14 +37,14 @@ You can test it by:
 
 ### Benchmarks in web-app
 
- The benchmark relates to a PSI protocol are based on the following `bfv` parameters:
+The benchmark relates to a PSI protocol are based on the following `bfv` parameters:
 
 - `ciphertext_moduli`: `[1032193, 1073692673]`
 - `extension_moduli` : `[995329, 1073668097]`
 - `plaintext_modulus`: `40961`
 - `ring_size`: `2048`
 
-The vector size is set to `ring_size * 3`
+The bit vector size, which is the subject of the PSI protocol, is set to `ring_size * 3`
 
 **Runtime**
 
