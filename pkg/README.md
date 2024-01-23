@@ -111,20 +111,26 @@ The benchmarks are run on M2 Macbook Pro with 12 cores and 32GB of RAM. The brow
 
 | Operation | Time (ms) |
 | ---       | ---       |
-| state 0   | 13.86     |
-| state 1   | 33.25     |
-| state 2   | 53.91     |
-| state 3   | 38.12     |
-| state 4   | 11.44     |
+| state0_bindgen   | 13.86     |
+| state1_bindgen   | 33.25     |
+| state2_bindgen   | 53.91     |
+| state3_bindgen   | 38.12     |
+| state4_bindgen   | 11.44     |
 
 **Communication Bandwidth**
 
 The following benchmarks measure the size in terms of bytes of the output of each state. The benchmark code can be found inside `src/lib.rs` and reproduced by running `cargo test --release -- --nocapture`.
 
-| Operation | Size (bytes) |
-| ---       | ---          |
-| state 0   | 170016       |
-| state 1   | 288818       |
-| state 2   | 264234       |
-| state 3   | 39174        |
-| state 4   | 768          |
+| State   | Output             | Size in Bytes |
+| ------- | ------------------ | ------------- |
+| State 0 | `private_output_a` | 1026          |
+| State 0 | `public_output_a`  | 84495         |
+| State 0 | `message_a_to_b`   | 84495         |
+| State 1 | `private_output_b` | 513           |
+| State 1 | `public_output_b`  | 144408        |
+| State 1 | `message_b_to_a`   | 195105        |
+| State 2 | `public_output_a`  | 115218        |
+| State 2 | `message_a_to_b`   | 149016        |
+| State 3 | `message_b_to_a`   | 38406         |
+| State 3 | `psi_output_b`     | 768           |
+| State 4 | `psi_output_a`     | 768           |

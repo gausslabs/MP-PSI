@@ -588,37 +588,76 @@ mod tests {
         let (private_output_a_state0, public_output_a_state0, message_a_to_b_state0) = state0();
 
         // Benchmark bandwidth size of output state 0
-        let mut byte_count_state0 = 0;
-        byte_count_state0 += private_output_a_state0.s_pk_a.get_byte_size();
-        byte_count_state0 += private_output_a_state0.s_rlk_a.get_byte_size();
-        byte_count_state0 += public_output_a_state0.share_pk_a.get_byte_size();
-        byte_count_state0 += public_output_a_state0.share_rlk_a_round1.get_byte_size();
-        byte_count_state0 += message_a_to_b_state0.share_pk_a.get_byte_size();
-        byte_count_state0 += message_a_to_b_state0.share_rlk_a_round1.get_byte_size();
+        let mut byte_count_state0_private_output_a = 0;
+        byte_count_state0_private_output_a += private_output_a_state0.s_pk_a.get_byte_size();
+        byte_count_state0_private_output_a += private_output_a_state0.s_rlk_a.get_byte_size();
 
-        println!("byte_count_state0: {}", byte_count_state0);
+        println!(
+            "byte_count_state0_private_output_a: {}",
+            byte_count_state0_private_output_a
+        );
+
+        let mut byte_count_state0_public_output_a = 0;
+        byte_count_state0_public_output_a += public_output_a_state0.share_pk_a.get_byte_size();
+        byte_count_state0_public_output_a +=
+            public_output_a_state0.share_rlk_a_round1.get_byte_size();
+
+        println!(
+            "byte_count_state0_public_output_a: {}",
+            byte_count_state0_public_output_a
+        );
+
+        let mut byte_count_state0_message_a_to_b = 0;
+        byte_count_state0_message_a_to_b += message_a_to_b_state0.share_pk_a.get_byte_size();
+        byte_count_state0_message_a_to_b +=
+            message_a_to_b_state0.share_rlk_a_round1.get_byte_size();
+
+        println!(
+            "byte_count_state0_message_a_to_b: {}",
+            byte_count_state0_message_a_to_b
+        );
 
         // B: state 1
         let bit_vector_b = random_bit_vector(hamming_weight, vector_size);
         let (private_output_b_state1, public_output_b_state1, message_b_to_a_state1) =
             state1(message_a_to_b_state0, &bit_vector_b);
-        let mut byte_count_state1 = 0;
-        byte_count_state1 += private_output_b_state1.s_pk_b.get_byte_size();
-        byte_count_state1 += public_output_b_state1
-            .ciphertexts_b
-            .iter()
-            .fold(0, |acc, ct| acc + ct.get_byte_size());
-        byte_count_state1 += public_output_b_state1.rlk_agg_round1_h1s.get_byte_size();
-        byte_count_state1 += public_output_b_state1.share_rlk_b_round2.get_byte_size();
-        byte_count_state1 += message_b_to_a_state1
-            .ciphertexts_b
-            .iter()
-            .fold(0, |acc, ct| acc + ct.get_byte_size());
-        byte_count_state1 += message_b_to_a_state1.share_pk_b.get_byte_size();
-        byte_count_state1 += message_b_to_a_state1.share_rlk_b_round1.get_byte_size();
-        byte_count_state1 += message_b_to_a_state1.share_rlk_b_round2.get_byte_size();
 
-        println!("byte_count_state1: {}", byte_count_state1);
+        let mut byte_count_state1_private_output_b = 0;
+        byte_count_state1_private_output_b += private_output_b_state1.s_pk_b.get_byte_size();
+        println!(
+            "byte_count_state1_private_output_b: {}",
+            byte_count_state1_private_output_b
+        );
+
+        let mut byte_count_state1_public_output_b = 0;
+        byte_count_state1_public_output_b += public_output_b_state1
+            .ciphertexts_b
+            .iter()
+            .fold(0, |acc, ct| acc + ct.get_byte_size());
+        byte_count_state1_public_output_b +=
+            public_output_b_state1.rlk_agg_round1_h1s.get_byte_size();
+        byte_count_state1_public_output_b +=
+            public_output_b_state1.share_rlk_b_round2.get_byte_size();
+        println!(
+            "byte_count_state1_public_output_b: {}",
+            byte_count_state1_public_output_b
+        );
+
+        let mut byte_count_state1_message_b_to_a = 0;
+        byte_count_state1_message_b_to_a += message_b_to_a_state1
+            .ciphertexts_b
+            .iter()
+            .fold(0, |acc, ct| acc + ct.get_byte_size());
+        byte_count_state1_message_b_to_a += message_b_to_a_state1.share_pk_b.get_byte_size();
+        byte_count_state1_message_b_to_a +=
+            message_b_to_a_state1.share_rlk_b_round1.get_byte_size();
+        byte_count_state1_message_b_to_a +=
+            message_b_to_a_state1.share_rlk_b_round2.get_byte_size();
+
+        println!(
+            "byte_count_state1_message_b_to_a: {}",
+            byte_count_state1_message_b_to_a
+        );
 
         // A: state 2
         let bit_vector_a = random_bit_vector(hamming_weight, vector_size);
@@ -629,26 +668,36 @@ mod tests {
             &bit_vector_a,
         );
 
-        let mut byte_count_state2 = 0;
-        byte_count_state2 += public_output_a_state2
+        let mut byte_count_state2_public_output_a = 0;
+        byte_count_state2_public_output_a += public_output_a_state2
             .decryption_shares_a
             .iter()
             .fold(0, |acc, share| acc + share.get_byte_size());
-        byte_count_state2 += public_output_a_state2
+        byte_count_state2_public_output_a += public_output_a_state2
             .ciphertexts_res
             .iter()
             .fold(0, |acc, ct| acc + ct.get_byte_size());
-        byte_count_state2 += message_a_to_b_state2
+        println!(
+            "byte_count_state2_public_output_a: {}",
+            byte_count_state2_public_output_a
+        );
+
+        let mut byte_count_state2_message_a_to_b = 0;
+        byte_count_state2_message_a_to_b += message_a_to_b_state2
             .decryption_shares_a
             .iter()
             .fold(0, |acc, share| acc + share.get_byte_size());
-        byte_count_state2 += message_a_to_b_state2
+        byte_count_state2_message_a_to_b += message_a_to_b_state2
             .ciphertexts_a
             .iter()
             .fold(0, |acc, ct| acc + ct.get_byte_size());
-        byte_count_state2 += message_a_to_b_state2.share_rlk_a_round2.get_byte_size();
+        byte_count_state2_message_a_to_b +=
+            message_a_to_b_state2.share_rlk_a_round2.get_byte_size();
 
-        println!("byte_count_state2: {}", byte_count_state2);
+        println!(
+            "byte_count_state2_message_a_to_b: {}",
+            byte_count_state2_message_a_to_b
+        );
 
         // B: state 3
         let (message_b_to_a_state3, psi_output_b) = state3(
@@ -657,22 +706,31 @@ mod tests {
             message_a_to_b_state2,
         );
 
-        let mut byte_count_state3 = 0;
-        byte_count_state3 += message_b_to_a_state3
+        let byte_count_state3_message_b_to_a = message_b_to_a_state3
             .decryption_shares_b
             .iter()
             .fold(0, |acc, share| acc + share.get_byte_size());
-        byte_count_state3 += psi_output_b.len() / 8; // Divide by 8 to account for the fact that it is a bit vector
+        let byte_count_state3_psi_output_b = psi_output_b.len() / 8; // Divide by 8 to account for the fact that it is a bit vector
 
-        println!("byte_count_state3: {}", byte_count_state3);
+        println!(
+            "byte_count_state3_message_b_to_a: {}",
+            byte_count_state3_message_b_to_a
+        );
+
+        println!(
+            "byte_count_state3_psi_output_b: {}",
+            byte_count_state3_psi_output_b
+        );
 
         // A: state 4
         let psi_output_a = state4(public_output_a_state2, message_b_to_a_state3);
 
-        let mut byte_count_state4 = 0;
-        byte_count_state4 += psi_output_a.len() / 8; // Divide by 8 to account for the fact that it is a bit vector
+        let byte_count_state4_psi_output_a = psi_output_a.len() / 8; // Divide by 8 to account for the fact that it is a bit vector
 
-        println!("byte_count_state4: {}", byte_count_state4);
+        println!(
+            "byte_count_state4_psi_output_a {}",
+            byte_count_state4_psi_output_a
+        );
 
         let expected_psi_output = plain_psi(&bit_vector_a, &bit_vector_b);
 
