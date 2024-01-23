@@ -17,10 +17,10 @@ This is a research project and is not meant to be used in production. The code h
 
     init().then(() => {
         const state0 = state0_bindgen();        
-        const bit_vector_a = [1, 0, 1, 0, 1, 0, 1, 0, 1, 1];
-        const state1 = state1_bindgen(state0.message_a_to_b, bit_vector_a);
-        const bit_vector_b = [1, 1, 1, 1, 1, 0, 1, 0, 0, 0];
-        const state2 = state2_bindgen(state0.private_output_a, state0.public_output_a, state1.message_b_to_a, bit_vector_b);
+        const bit_vector_b = [1, 0, 1, 0, 1, 0, 1, 0, 1, 1];
+        const state1 = state1_bindgen(state0.message_a_to_b, bit_vector_b);
+        const bit_vector_a = [1, 1, 1, 1, 1, 0, 1, 0, 0, 0];
+        const state2 = state2_bindgen(state0.private_output_a, state0.public_output_a, state1.message_b_to_a, bit_vector_a);
         const state3 = state3_bindgen(state1.private_output_b, state1.public_output_b, state2.message_a_to_b);
         const psi_output_a = state4_bindgen(state2.public_output_a, state3.message_b_to_a);
         const psi_output_b = state3.psi_output;

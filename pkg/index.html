@@ -38,16 +38,16 @@
         
         const hammingWeight = 1000;
         const size = 2048 * 3;
-        const bit_vector_a = randomBitVector(hammingWeight, size);
-
-        console.time('state1 Time');
-        const state1 = state1_bindgen(state0.message_a_to_b, bit_vector_a);
-        console.timeEnd('state1 Time');
-
         const bit_vector_b = randomBitVector(hammingWeight, size);
 
+        console.time('state1 Time');
+        const state1 = state1_bindgen(state0.message_a_to_b, bit_vector_b);
+        console.timeEnd('state1 Time');
+
+        const bit_vector_a = randomBitVector(hammingWeight, size);
+
         console.time('state2 Time');
-        const state2 = state2_bindgen(state0.private_output_a, state0.public_output_a, state1.message_b_to_a, bit_vector_b);
+        const state2 = state2_bindgen(state0.private_output_a, state0.public_output_a, state1.message_b_to_a, bit_vector_a);
         console.timeEnd('state2 Time');
 
         console.time('state3 Time');
