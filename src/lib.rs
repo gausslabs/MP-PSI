@@ -1,21 +1,13 @@
-use std::char::ParseCharError;
-
 use bfv::{
-    BfvParameters, Ciphertext, CiphertextProto, CollectiveDecryption, CollectiveDecryptionShare,
-    CollectiveDecryptionShareProto, CollectivePublicKeyGenerator, CollectivePublicKeyShare,
-    CollectivePublicKeyShareProto, CollectiveRlkAggShare1, CollectiveRlkAggTrimmedShare1,
-    CollectiveRlkAggTrimmedShare1Proto, CollectiveRlkGenerator, CollectiveRlkShare1,
-    CollectiveRlkShare1Proto, CollectiveRlkShare2, CollectiveRlkShare2Proto, Encoding,
-    EvaluationKey, Evaluator, Plaintext, SecretKey, SecretKeyProto,
+    BfvParameters, Ciphertext, CollectiveDecryption, CollectiveDecryptionShare,
+    CollectivePublicKeyGenerator, CollectivePublicKeyShare, CollectiveRlkAggTrimmedShare1,
+    CollectiveRlkGenerator, CollectiveRlkShare1, CollectiveRlkShare2, Encoding, EvaluationKey,
+    Evaluator, Plaintext, SecretKey,
 };
 use itertools::{izip, Itertools};
 use rand::thread_rng;
-use serde::{de, Deserialize, Serialize};
-use traits::{
-    TryDecodingWithParameters, TryEncodingWithParameters, TryFromWithLevelledParameters,
-    TryFromWithParameters,
-};
-use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
+
+use traits::{TryDecodingWithParameters, TryEncodingWithParameters, TryFromWithParameters};
 
 mod bandwidth_benches;
 
@@ -88,14 +80,14 @@ fn round1(
     // generate pk
     let collective_pk = CollectivePublicKeyGenerator::aggregate_shares_and_finalise(
         &params,
-        &vec![message.share_pk, other_message.share_pk],
+        &[message.share_pk, other_message.share_pk],
         CRS_PK,
     );
 
     // generate rlk share 2
     let rlk_agg1 = CollectiveRlkGenerator::aggregate_shares_1(
         &params,
-        &vec![message.share_rlk1, other_message.share_rlk1],
+        &[message.share_rlk1, other_message.share_rlk1],
         0,
     );
     let share_rlk2 = CollectiveRlkGenerator::generate_share_2(
@@ -149,7 +141,7 @@ fn round2(
     // Create RLK
     let rlk = CollectiveRlkGenerator::aggregate_shares_2(
         &params,
-        &vec![message.share_rlk2, other_message.share_rlk2],
+        &[message.share_rlk2, other_message.share_rlk2],
         state_round2.rlk_agg1_trimmed,
         0,
     );
@@ -171,9 +163,7 @@ fn round2(
         .collect_vec();
     let decryption_shares = cts_res
         .iter()
-        .map(|c| {
-            CollectiveDecryption::generate_share(evaluator.params(), &c, &psi_keys.s, &mut rng)
-        })
+        .map(|c| CollectiveDecryption::generate_share(evaluator.params(), c, &psi_keys.s, &mut rng))
         .collect_vec();
 
     (StateRound3 { cts_res }, MessageRound3 { decryption_shares })
@@ -191,8 +181,7 @@ fn round3(
         other_message.decryption_shares.into_iter()
     )
     .flat_map(|(c, share_a, share_b)| {
-        let pt =
-            CollectiveDecryption::aggregate_share_and_decrypt(&params, c, &vec![share_a, share_b]);
+        let pt = CollectiveDecryption::aggregate_share_and_decrypt(&params, c, &[share_a, share_b]);
         Vec::<u32>::try_decoding_with_parameters(&pt, &params, Encoding::default())
     })
     .collect_vec()
@@ -208,7 +197,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::bandwidth_benches::BandwidthBench;
+
     use itertools::{izip, Itertools};
     use rand::{distributions::Uniform, Rng};
 
@@ -216,7 +205,7 @@ mod tests {
         let mut rng = thread_rng();
 
         let mut bit_vector = vec![0; size];
-        (0..hamming_weight).into_iter().for_each(|_| {
+        (0..hamming_weight).for_each(|_| {
             let sample_index = rng.sample(Uniform::new(0, size));
             bit_vector[sample_index] = 1;
         });
