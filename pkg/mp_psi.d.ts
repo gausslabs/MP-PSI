@@ -3,44 +3,37 @@
 /**
 * @returns {any}
 */
-export function state0_bindgen(): any;
+export function gen_keys_js(): any;
 /**
-* @param {any} message_a_to_b
+* @param {any} gen_keys_output
+* @param {any} other_message_round1
 * @param {Uint32Array} bit_vector
 * @returns {any}
 */
-export function state1_bindgen(message_a_to_b: any, bit_vector: Uint32Array): any;
+export function round1_js(gen_keys_output: any, other_message_round1: any, bit_vector: Uint32Array): any;
 /**
-* @param {any} private_output_a_state0
-* @param {any} public_output_a_state0
-* @param {any} message_b_to_a
-* @param {Uint32Array} bit_vector
+* @param {any} gen_keys_output
+* @param {any} round1_output
+* @param {any} other_message_round2
+* @param {boolean} is_a
 * @returns {any}
 */
-export function state2_bindgen(private_output_a_state0: any, public_output_a_state0: any, message_b_to_a: any, bit_vector: Uint32Array): any;
+export function round2_js(gen_keys_output: any, round1_output: any, other_message_round2: any, is_a: boolean): any;
 /**
-* @param {any} private_output_b_state1
-* @param {any} public_output_b_state1
-* @param {any} message_a_to_b
-* @returns {any}
-*/
-export function state3_bindgen(private_output_b_state1: any, public_output_b_state1: any, message_a_to_b: any): any;
-/**
-* @param {any} public_output_a_state2
-* @param {any} message_b_to_a
+* @param {any} round2_output
+* @param {any} other_message
 * @returns {Uint32Array}
 */
-export function state4_bindgen(public_output_a_state2: any, message_b_to_a: any): Uint32Array;
+export function round3_js(round2_output: any, other_message: any): Uint32Array;
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
-  readonly state0_bindgen: () => number;
-  readonly state1_bindgen: (a: number, b: number, c: number) => number;
-  readonly state2_bindgen: (a: number, b: number, c: number, d: number, e: number) => number;
-  readonly state3_bindgen: (a: number, b: number, c: number) => number;
-  readonly state4_bindgen: (a: number, b: number, c: number) => void;
+  readonly gen_keys_js: () => number;
+  readonly round1_js: (a: number, b: number, c: number, d: number) => number;
+  readonly round2_js: (a: number, b: number, c: number, d: number) => number;
+  readonly round3_js: (a: number, b: number, c: number) => void;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
   readonly __wbindgen_add_to_stack_pointer: (a: number) => number;

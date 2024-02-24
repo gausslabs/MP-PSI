@@ -1,6 +1,6 @@
 {
   "name": "mp-psi",
-  "version": "0.1.9.1",
+  "version": "0.1.0",
   "files": [
     "mp_psi_bg.wasm",
     "mp_psi.js",
@@ -8,7 +8,5 @@
   ],
   "module": "mp_psi.js",
   "types": "mp_psi.d.ts",
-  "sideEffects": [
-    "./snippets/*"
-  ]
+  "sideEffects": false
 }

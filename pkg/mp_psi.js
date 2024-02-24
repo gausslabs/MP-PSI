@@ -191,8 +191,8 @@ function debugString(val) {
 /**
 * @returns {any}
 */
-export function state0_bindgen() {
-    const ret = wasm.state0_bindgen();
+export function gen_keys_js() {
+    const ret = wasm.gen_keys_js();
     return takeObject(ret);
 }
 
@@ -212,39 +212,27 @@ function passArray32ToWasm0(arg, malloc) {
     return ptr;
 }
 /**
-* @param {any} message_a_to_b
+* @param {any} gen_keys_output
+* @param {any} other_message_round1
 * @param {Uint32Array} bit_vector
 * @returns {any}
 */
-export function state1_bindgen(message_a_to_b, bit_vector) {
+export function round1_js(gen_keys_output, other_message_round1, bit_vector) {
     const ptr0 = passArray32ToWasm0(bit_vector, wasm.__wbindgen_malloc);
     const len0 = WASM_VECTOR_LEN;
-    const ret = wasm.state1_bindgen(addHeapObject(message_a_to_b), ptr0, len0);
+    const ret = wasm.round1_js(addHeapObject(gen_keys_output), addHeapObject(other_message_round1), ptr0, len0);
     return takeObject(ret);
 }
 
 /**
-* @param {any} private_output_a_state0
-* @param {any} public_output_a_state0
-* @param {any} message_b_to_a
-* @param {Uint32Array} bit_vector
+* @param {any} gen_keys_output
+* @param {any} round1_output
+* @param {any} other_message_round2
+* @param {boolean} is_a
 * @returns {any}
 */
-export function state2_bindgen(private_output_a_state0, public_output_a_state0, message_b_to_a, bit_vector) {
-    const ptr0 = passArray32ToWasm0(bit_vector, wasm.__wbindgen_malloc);
-    const len0 = WASM_VECTOR_LEN;
-    const ret = wasm.state2_bindgen(addHeapObject(private_output_a_state0), addHeapObject(public_output_a_state0), addHeapObject(message_b_to_a), ptr0, len0);
-    return takeObject(ret);
-}
-
-/**
-* @param {any} private_output_b_state1
-* @param {any} public_output_b_state1
-* @param {any} message_a_to_b
-* @returns {any}
-*/
-export function state3_bindgen(private_output_b_state1, public_output_b_state1, message_a_to_b) {
-    const ret = wasm.state3_bindgen(addHeapObject(private_output_b_state1), addHeapObject(public_output_b_state1), addHeapObject(message_a_to_b));
+export function round2_js(gen_keys_output, round1_output, other_message_round2, is_a) {
+    const ret = wasm.round2_js(addHeapObject(gen_keys_output), addHeapObject(round1_output), addHeapObject(other_message_round2), is_a);
     return takeObject(ret);
 }
 
@@ -253,14 +241,14 @@ function getArrayU32FromWasm0(ptr, len) {
     return getUint32Memory0().subarray(ptr / 4, ptr / 4 + len);
 }
 /**
-* @param {any} public_output_a_state2
-* @param {any} message_b_to_a
+* @param {any} round2_output
+* @param {any} other_message
 * @returns {Uint32Array}
 */
-export function state4_bindgen(public_output_a_state2, message_b_to_a) {
+export function round3_js(round2_output, other_message) {
     try {
         const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-        wasm.state4_bindgen(retptr, addHeapObject(public_output_a_state2), addHeapObject(message_b_to_a));
+        wasm.round3_js(retptr, addHeapObject(round2_output), addHeapObject(other_message));
         var r0 = getInt32Memory0()[retptr / 4 + 0];
         var r1 = getInt32Memory0()[retptr / 4 + 1];
         var v1 = getArrayU32FromWasm0(r0, r1).slice();
